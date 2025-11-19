@@ -1,0 +1,248 @@
+DISCREPANCY REPORT
+==================
+
+Total coins parsed: 99
+Total discrepancies found: 43
+
+Breakdown by type:
+- Privacy Level mismatches: 0
+- Technology category mismatches: 1
+- New coins (in database only): 16
+- Missing coins (in metadata only): 26
+
+DETAILED DISCREPANCIES:
+=======================
+
+1. Horizen (zencash)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+2. Firo (zcoin)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+3. ANyONe Protocol (airtor-protocol)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+4. Veil Token (veil-token)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+5. BEAM (beam-2)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+6. GhostwareOS (ghostwareos)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+7. Data Ownership Protocol 2 (data-ownership-protocol-2)
+   Type: technology
+   Current: MPC
+   Database: TEE
+   Reason: Technology category differs: MPC → TEE (from "Confidential Computing / MPC")
+   Impact: Table and detail page will show database value
+
+8. MUTE SWAP by Virtuals (mute-swap-by-virtuals)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+9. NONOS (nonos-2)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+10. Session Token (session-token)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+11. PRXVT by Virtuals (prxvt-by-virtuals)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+12. Ryo Currency (ryo)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+13. Voidify (-7)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+14. Scala (stellite)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+15. PRivaCY Coin (prcy-coin)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+16. Spectre (spectre-network)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+17. BlockWallet (blank)
+   Type: new
+   Database: [object Object]
+   Reason: Coin exists in database but not in current metadata
+   Impact: Will be added to metadata
+
+18. horizen (horizen)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+19. firo (firo)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+20. anyone-protocol (anyone-protocol)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+21. veil (veil)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+22. beam (beam)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+23. ghostware-os (ghostware-os)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+24. mute (mute)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+25. nonos (nonos)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+26. session (session)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+27. prxvt (prxvt)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+28. ghost (ghost)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+29. ryo-currency (ryo-currency)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+30. voidify (voidify)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+31. scala (scala)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+32. privacy-coin (privacy-coin)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+33. spectre (spectre)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+34. blockwallet (blockwallet)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+35. houdiniswap (houdiniswap)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+36. tari (tari)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+37. dop (dop)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+38. navcoin (navcoin)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+39. privasea (privasea)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+40. zkfairlaunch (zkfairlaunch)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+41. tritanium (tritanium)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+42. spectre-dividend-token (spectre-dividend-token)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+
+43. osca (osca)
+   Type: missing
+   Reason: Coin exists in current metadata but not in database
+   Impact: Will keep existing metadata
+

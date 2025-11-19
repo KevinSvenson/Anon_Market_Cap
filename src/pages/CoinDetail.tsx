@@ -1,15 +1,18 @@
-import { useMemo, ReactNode } from "react";
+import { useMemo, ReactNode, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
+import CoinPriceChart from "@/components/CoinPriceChart";
 import { 
-  fetchCoinDetail, 
+  fetchCoinDetail,
+  fetchPrivacyCoins,
   RateLimitError, 
   NetworkError,
   type CoinDetail as CoinDetailType 
 } from "@/services/coingecko";
-import { ArrowLeft, Loader2, AlertCircle, WifiOff, Clock } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, WifiOff, Clock, Shield, Check, X, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getPrivacyMetadata, getTechnologyColor, getPrivacyLevelColor, getSecurityRatingColor } from "@/data/privacyMetadata";
 
 const formatCurrency = (num: number | null | undefined) => {
   if (num == null) return "N/A";
@@ -42,6 +45,7 @@ const stripHtml = (html: string | undefined) => {
 const CoinDetail = () => {
   const { coinId } = useParams<{ coinId: string }>();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<"overview" | "privacy" | "chart">("overview");
 
   const { data, isLoading, error, isError } = useQuery<CoinDetailType>({
     queryKey: ["coinDetail", coinId],
@@ -67,12 +71,35 @@ const CoinDetail = () => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
+  // Fetch market data for sparkline (price chart)
+  const { data: marketData } = useQuery({
+    queryKey: ["coinMarketData", coinId],
+    queryFn: async () => {
+      if (!coinId) return null;
+      const coins = await fetchPrivacyCoins(100, 1);
+      return coins.find(coin => coin.id === coinId) || null;
+    },
+    enabled: Boolean(coinId),
+    staleTime: 120000,
+    refetchOnWindowFocus: false,
+  });
+
+  // Get privacy metadata for this coin
+  const privacyMetadata = useMemo(() => {
+    if (!coinId) return null;
+    return getPrivacyMetadata(coinId);
+  }, [coinId]);
+
   const description = useMemo(() => {
+    // Use privacySolutionSummary if available, otherwise fall back to CoinGecko description
+    if (privacyMetadata?.privacySolutionSummary) {
+      return privacyMetadata.privacySolutionSummary;
+    }
     const raw = data?.description?.en ?? "";
     const sanitized = stripHtml(raw).trim();
     if (!sanitized) return "No description available.";
     return sanitized.length > 500 ? `${sanitized.slice(0, 500)}...` : sanitized;
-  }, [data]);
+  }, [data, privacyMetadata]);
 
   const handleBack = () => {
     navigate(-1);
@@ -113,9 +140,9 @@ const CoinDetail = () => {
   } else if (!data) {
     content = renderErrorState("Coin details not available.", AlertCircle);
   } else {
-    const marketData = data.market_data;
+    const coinMarketData = data.market_data;
     content = (
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-4">
@@ -140,6 +167,29 @@ const CoinDetail = () => {
                     Rank #{data.market_cap_rank}
                   </span>
                 )}
+                {privacyMetadata && (
+                  <>
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border",
+                      getTechnologyColor(privacyMetadata.technology)
+                    )}>
+                      <Shield className="h-3.5 w-3.5" />
+                      {privacyMetadata.specificTechnology || privacyMetadata.technology}
+                    </span>
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium border",
+                      getPrivacyLevelColor(privacyMetadata.privacyLevel)
+                    )}
+                      title="Privacy Strength: How anonymous your transactions are"
+                    >
+                      <Shield className="h-3.5 w-3.5" />
+                      {privacyMetadata.privacyLevel}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
+                      Privacy: {privacyMetadata.privacyScore}/100
+                    </span>
+                  </>
+                )}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 Hashing Algorithm: {data.hashing_algorithm ?? "N/A"} • Genesis Date:{" "}
@@ -156,91 +206,350 @@ const CoinDetail = () => {
           </button>
         </div>
 
-        {/* Price Overview */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">Current Price</p>
-            <p className="text-2xl font-semibold text-foreground">
-              {formatCurrency(marketData?.current_price?.usd ?? null)}
-            </p>
-            <p
+        {/* Tabs Navigation */}
+        <div className="border-b border-border">
+          <div className="flex gap-4">
+            <button
+              onClick={() => setActiveTab("overview")}
               className={cn(
-                "text-sm mt-2",
-                (marketData?.price_change_percentage_24h ?? 0) >= 0
-                  ? "text-positive"
-                  : "text-negative"
+                "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                activeTab === "overview"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
               )}
             >
-              {formatPercentage(marketData?.price_change_percentage_24h ?? null)} (24h)
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">Market Cap</p>
-            <p className="text-2xl font-semibold text-foreground">
-              {formatCurrency(marketData?.market_cap?.usd ?? null)}
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">24h Volume</p>
-            <p className="text-2xl font-semibold text-foreground">
-              {formatCurrency(marketData?.total_volume?.usd ?? null)}
-            </p>
-          </div>
-        </div>
-
-        {/* Additional Stats */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">High (24h)</p>
-            <p className="text-xl font-semibold text-foreground">
-              {formatCurrency(marketData?.high_24h?.usd ?? null)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">Low (24h)</p>
-            <p className="text-xl font-semibold text-foreground">
-              {formatCurrency(marketData?.low_24h?.usd ?? null)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">Circulating Supply</p>
-            <p className="text-xl font-semibold text-foreground">
-              {formatSupply(marketData?.circulating_supply)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">Total Supply</p>
-            <p className="text-xl font-semibold text-foreground">
-              {formatSupply(marketData?.total_supply)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">Max Supply</p>
-            <p className="text-xl font-semibold text-foreground">
-              {formatSupply(marketData?.max_supply)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-            <p className="text-sm text-muted-foreground mb-1">Last Updated</p>
-            <p className="text-xl font-semibold text-foreground">
-              {data.last_updated
-                ? new Date(data.last_updated).toLocaleString()
-                : "N/A"}
-            </p>
+              Overview
+            </button>
+            <button
+              onClick={() => setActiveTab("privacy")}
+              className={cn(
+                "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                activeTab === "privacy"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Privacy Features
+            </button>
+            <button
+              onClick={() => setActiveTab("chart")}
+              className={cn(
+                "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
+                activeTab === "chart"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Price Chart
+            </button>
           </div>
         </div>
 
-        {/* Description */}
-        <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
-          <h2 className="text-lg font-semibold text-foreground mb-2">
-            About {data.name}
-          </h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {description}
-          </p>
-        </div>
+        {/* Tab Content */}
+        {activeTab === "overview" && (
+          <div className="space-y-6">
+
+            {/* Price Overview */}
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">Current Price</p>
+                <p className="text-2xl font-semibold text-foreground">
+                  {formatCurrency(coinMarketData?.current_price?.usd ?? null)}
+                </p>
+                <p
+                  className={cn(
+                    "text-sm mt-2",
+                    (coinMarketData?.price_change_percentage_24h ?? 0) >= 0
+                      ? "text-positive"
+                      : "text-negative"
+                  )}
+                >
+                  {formatPercentage(coinMarketData?.price_change_percentage_24h ?? null)} (24h)
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">Market Cap</p>
+                <p className="text-2xl font-semibold text-foreground">
+                  {formatCurrency(coinMarketData?.market_cap?.usd ?? null)}
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">24h Volume</p>
+                <p className="text-2xl font-semibold text-foreground">
+                  {formatCurrency(coinMarketData?.total_volume?.usd ?? null)}
+                </p>
+              </div>
+            </div>
+
+            {/* Additional Stats */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">High (24h)</p>
+                <p className="text-xl font-semibold text-foreground">
+                  {formatCurrency(coinMarketData?.high_24h?.usd ?? null)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">Low (24h)</p>
+                <p className="text-xl font-semibold text-foreground">
+                  {formatCurrency(coinMarketData?.low_24h?.usd ?? null)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">Circulating Supply</p>
+                <p className="text-xl font-semibold text-foreground">
+                  {formatSupply(coinMarketData?.circulating_supply)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">Total Supply</p>
+                <p className="text-xl font-semibold text-foreground">
+                  {formatSupply(coinMarketData?.total_supply)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">Max Supply</p>
+                <p className="text-xl font-semibold text-foreground">
+                  {formatSupply(coinMarketData?.max_supply)}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <p className="text-sm text-muted-foreground mb-1">Last Updated</p>
+                <p className="text-xl font-semibold text-foreground">
+                  {data.last_updated
+                    ? new Date(data.last_updated).toLocaleString()
+                    : "N/A"}
+                </p>
+              </div>
+            </div>
+
+            {/* Security Rating */}
+            {privacyMetadata?.securityRating && (
+              <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Star className="h-5 w-5 text-primary" />
+                      Implementation Quality
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      How secure and well-tested the code is - Overall implementation quality, battle-testing, and vulnerability resistance
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={cn(
+                      "inline-flex items-center gap-2 px-4 py-2 rounded-md text-lg font-bold border",
+                      getSecurityRatingColor(privacyMetadata.securityRating)
+                    )}>
+                      {privacyMetadata.securityRating}/10
+                    </span>
+                    <div className="flex gap-1">
+                      {Array.from({ length: 10 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={cn(
+                            "w-2 h-8 rounded-sm",
+                            i < privacyMetadata.securityRating
+                              ? privacyMetadata.securityRating >= 8
+                                ? "bg-green-500"
+                                : privacyMetadata.securityRating >= 6
+                                ? "bg-yellow-500"
+                                : "bg-red-500"
+                              : "bg-muted"
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            <div className="rounded-lg border border-border p-4 bg-card shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground mb-2">
+                Privacy Solution
+              </h2>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {description}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Privacy Features Tab */}
+        {activeTab === "privacy" && privacyMetadata && (
+          <div className="space-y-6">
+            {privacyMetadata.technology === "Unknown" ? (
+              /* Unknown Technology Message */
+              <div className="rounded-lg border border-border p-8 bg-card shadow-sm text-center">
+                <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h2 className="text-xl font-semibold text-foreground mb-3">
+                  Privacy Technology Classification Pending
+                </h2>
+                <p className="text-sm text-muted-foreground max-w-2xl mx-auto mb-4">
+                  This coin is listed in CoinGecko's privacy-coins category but hasn't been fully researched yet. 
+                  Privacy features and technology details will be added after manual verification.
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Estimated privacy score: {privacyMetadata.privacyScore}/100
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Privacy Score Card */}
+                <div className="rounded-lg border border-border p-6 bg-card shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Shield className="h-6 w-6 text-primary" />
+                    <h2 className="text-xl font-semibold text-foreground">
+                      Privacy Score: {privacyMetadata.privacyScore}/100
+                    </h2>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-3 mb-4">
+                    <div 
+                      className="bg-primary h-3 rounded-full transition-all"
+                      style={{ width: `${privacyMetadata.privacyScore}%` }}
+                    />
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {privacyMetadata.privacyScore >= 90 && "Excellent privacy protection with comprehensive features."}
+                    {privacyMetadata.privacyScore >= 75 && privacyMetadata.privacyScore < 90 && "Strong privacy features with good protection."}
+                    {privacyMetadata.privacyScore >= 60 && privacyMetadata.privacyScore < 75 && "Moderate privacy features with some limitations."}
+                    {privacyMetadata.privacyScore < 60 && "Basic privacy features - consider stronger alternatives for maximum privacy."}
+                  </p>
+                </div>
+
+                {/* Full Description */}
+                {privacyMetadata.fullDescription && (
+                  <div className="rounded-lg border border-border p-6 bg-card shadow-sm">
+                    <h2 className="text-lg font-semibold text-foreground mb-3">
+                      About {data.name}
+                    </h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {privacyMetadata.fullDescription}
+                    </p>
+                  </div>
+                )}
+
+                {/* Privacy Strength Explanation */}
+                {privacyMetadata.privacyLevelExplanation && (
+                  <div className="rounded-lg border border-border p-6 bg-card shadow-sm">
+                    <h2 className="text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <Shield className="h-5 w-5 text-primary" />
+                      <span className={cn(
+                        "px-3 py-1 rounded-md text-sm font-medium border",
+                        getPrivacyLevelColor(privacyMetadata.privacyLevel)
+                      )}>
+                        {privacyMetadata.privacyLevel} Privacy Strength
+                      </span>
+                      <span>- Why This Rating?</span>
+                    </h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {privacyMetadata.privacyLevelExplanation}
+                    </p>
+                  </div>
+                )}
+
+            {/* Technology Card */}
+            <div className="rounded-lg border border-border p-6 bg-card shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground mb-3">
+                Privacy Technology
+              </h2>
+              <div className="mb-4">
+                <span className={cn(
+                  "inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium border",
+                  getTechnologyColor(privacyMetadata.technology)
+                )}>
+                  {privacyMetadata.specificTechnology || privacyMetadata.technology}
+                </span>
+              </div>
+              <p className="text-sm text-foreground leading-relaxed">
+                {privacyMetadata.technologyDescription}
+              </p>
+            </div>
+
+            {/* Privacy Features Grid */}
+            <div className="rounded-lg border border-border p-6 bg-card shadow-sm">
+              <h2 className="text-lg font-semibold text-foreground mb-4">
+                Privacy Features
+              </h2>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="flex items-start gap-3">
+                  {privacyMetadata.features.hiddenAmounts ? (
+                    <Check className="h-5 w-5 text-positive flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <X className="h-5 w-5 text-negative flex-shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Hidden Amounts</p>
+                    <p className="text-xs text-muted-foreground">Transaction amounts are concealed</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  {privacyMetadata.features.hiddenSender ? (
+                    <Check className="h-5 w-5 text-positive flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <X className="h-5 w-5 text-negative flex-shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Hidden Sender</p>
+                    <p className="text-xs text-muted-foreground">Sender address is obfuscated</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  {privacyMetadata.features.hiddenRecipient ? (
+                    <Check className="h-5 w-5 text-positive flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <X className="h-5 w-5 text-negative flex-shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Hidden Recipient</p>
+                    <p className="text-xs text-muted-foreground">Recipient address is concealed</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  {privacyMetadata.features.defaultPrivacy ? (
+                    <Check className="h-5 w-5 text-positive flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <X className="h-5 w-5 text-negative flex-shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Default Privacy</p>
+                    <p className="text-xs text-muted-foreground">
+                      {privacyMetadata.features.defaultPrivacy ? "Privacy is mandatory" : "Privacy is optional"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  {privacyMetadata.features.ipObfuscation ? (
+                    <Check className="h-5 w-5 text-positive flex-shrink-0 mt-0.5" />
+                  ) : (
+                    <X className="h-5 w-5 text-negative flex-shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <p className="text-sm font-medium text-foreground">IP Obfuscation</p>
+                    <p className="text-xs text-muted-foreground">Network-level privacy protection</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Price Chart Tab */}
+        {activeTab === "chart" && (
+          <div className="rounded-lg border border-border bg-card shadow-sm p-4">
+            <CoinPriceChart
+              sparklineData={marketData?.sparkline_in_7d?.price}
+              priceChange24h={marketData?.price_change_percentage_24h}
+              coinName={data.name}
+            />
+          </div>
+        )}
       </div>
     );
   }

@@ -16,8 +16,14 @@ const Header = () => {
           </span>
         </Link>
 
-        <nav className="flex items-center space-x-6">
-          <span className="hidden sm:inline text-sm text-muted-foreground">
+        <nav className="flex items-center space-x-4 sm:space-x-6">
+          <Link
+            to="/compare"
+            className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+          >
+            Compare
+          </Link>
+          <span className="hidden md:inline text-sm text-muted-foreground">
             Privacy-Focused Crypto Prices
           </span>
         </nav>

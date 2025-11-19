@@ -1,0 +1,158 @@
+COINGECKO ID DETECTION REPORT
+================================
+
+Total coins processed: 99
+ID changes detected: 24
+
+Confidence breakdown:
+- High confidence: 23
+- Medium confidence: 1
+- Low confidence: 0
+
+DETECTED CHANGES:
+=================
+
+1. Horizen (ZEN)
+   Old ID: horizen
+   New ID: zencash
+   Confidence: high
+   Reason: Exact name and symbol match
+
+2. Firo (FIRO)
+   Old ID: firo
+   New ID: zcoin
+   Confidence: high
+   Reason: Exact name and symbol match
+
+3. ANyONe Protocol (ANYONE)
+   Old ID: anyone-protocol
+   New ID: airtor-protocol
+   Confidence: high
+   Reason: Exact name and symbol match
+
+4. Houdini Swap (LOCK)
+   Old ID: houdiniswap
+   New ID: houdini-swap
+   Confidence: high
+   Reason: Exact name and symbol match
+
+5. Veil Token (VEIL)
+   Old ID: veil
+   New ID: veil-token
+   Confidence: high
+   Reason: Exact name and symbol match
+
+6. BEAM (BEAM)
+   Old ID: beam
+   New ID: beam-2
+   Confidence: high
+   Reason: Exact name and symbol match
+
+7. MinoTari (TARI)
+   Old ID: tari
+   New ID: minotari
+   Confidence: medium
+   Reason: Partial name match
+
+8. GhostwareOS (GHOST)
+   Old ID: ghostware-os
+   New ID: ghostwareos
+   Confidence: high
+   Reason: Exact name and symbol match
+
+9. Data Ownership Protocol 2 (DOP2)
+   Old ID: dop
+   New ID: data-ownership-protocol-2
+   Confidence: high
+   Reason: Exact name and symbol match
+
+10. MUTE SWAP by Virtuals (MUTE)
+   Old ID: mute
+   New ID: mute-swap-by-virtuals
+   Confidence: high
+   Reason: Exact name and symbol match
+
+11. NONOS (NOX)
+   Old ID: nonos
+   New ID: nonos-2
+   Confidence: high
+   Reason: Exact name and symbol match
+
+12. Navio (NAV)
+   Old ID: navcoin
+   New ID: nav-coin
+   Confidence: high
+   Reason: Exact name and symbol match
+
+13. Session Token (SESH)
+   Old ID: session
+   New ID: session-token
+   Confidence: high
+   Reason: Exact name and symbol match
+
+14. Privasea AI (PRAI)
+   Old ID: privasea
+   New ID: privasea-ai
+   Confidence: high
+   Reason: Exact name and symbol match
+
+15. PRXVT by Virtuals (PRXVT)
+   Old ID: prxvt
+   New ID: prxvt-by-virtuals
+   Confidence: high
+   Reason: Exact name and symbol match
+
+16. ZKLSOL (ZKFG)
+   Old ID: zkfairlaunch
+   New ID: zklsol
+   Confidence: high
+   Reason: Exact name and symbol match
+
+17. Ryo Currency (RYO)
+   Old ID: ryo-currency
+   New ID: ryo
+   Confidence: high
+   Reason: Exact name and symbol match
+
+18. Voidify (∅)
+   Old ID: voidify
+   New ID: -7
+   Confidence: high
+   Reason: Exact name and symbol match
+
+19. Scala (XLA)
+   Old ID: scala
+   New ID: stellite
+   Confidence: high
+   Reason: Exact name and symbol match
+
+20. Tritcoin (TRIT)
+   Old ID: tritanium
+   New ID: tritcoin
+   Confidence: high
+   Reason: Exact name and symbol match
+
+21. PRivaCY Coin (PRCY)
+   Old ID: privacy-coin
+   New ID: prcy-coin
+   Confidence: high
+   Reason: Exact name and symbol match
+
+22. Spectre (SPR)
+   Old ID: spectre-dividend-token
+   New ID: spectre-network
+   Confidence: high
+   Reason: Exact name and symbol match
+
+23. OSCA Stack (OSCA)
+   Old ID: osca
+   New ID: osca-stack
+   Confidence: high
+   Reason: Exact name and symbol match
+
+24. BlockWallet (BLANK)
+   Old ID: blockwallet
+   New ID: blank
+   Confidence: high
+   Reason: Exact name and symbol match
+

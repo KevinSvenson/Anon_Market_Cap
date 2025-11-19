@@ -1,0 +1,203 @@
+{
+  "totalCoinsProcessed": 99,
+  "changesDetected": 24,
+  "byConfidence": {
+    "high": 23,
+    "medium": 1,
+    "low": 0
+  },
+  "changes": [
+    {
+      "databaseName": "Horizen",
+      "symbol": "ZEN",
+      "oldId": "horizen",
+      "newId": "zencash",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Firo",
+      "symbol": "FIRO",
+      "oldId": "firo",
+      "newId": "zcoin",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "ANyONe Protocol",
+      "symbol": "ANYONE",
+      "oldId": "anyone-protocol",
+      "newId": "airtor-protocol",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Houdini Swap",
+      "symbol": "LOCK",
+      "oldId": "houdiniswap",
+      "newId": "houdini-swap",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Veil Token",
+      "symbol": "VEIL",
+      "oldId": "veil",
+      "newId": "veil-token",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "BEAM",
+      "symbol": "BEAM",
+      "oldId": "beam",
+      "newId": "beam-2",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "MinoTari",
+      "symbol": "TARI",
+      "oldId": "tari",
+      "newId": "minotari",
+      "confidence": "medium",
+      "reason": "Partial name match"
+    },
+    {
+      "databaseName": "GhostwareOS",
+      "symbol": "GHOST",
+      "oldId": "ghostware-os",
+      "newId": "ghostwareos",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Data Ownership Protocol 2",
+      "symbol": "DOP2",
+      "oldId": "dop",
+      "newId": "data-ownership-protocol-2",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "MUTE SWAP by Virtuals",
+      "symbol": "MUTE",
+      "oldId": "mute",
+      "newId": "mute-swap-by-virtuals",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "NONOS",
+      "symbol": "NOX",
+      "oldId": "nonos",
+      "newId": "nonos-2",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Navio",
+      "symbol": "NAV",
+      "oldId": "navcoin",
+      "newId": "nav-coin",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Session Token",
+      "symbol": "SESH",
+      "oldId": "session",
+      "newId": "session-token",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Privasea AI",
+      "symbol": "PRAI",
+      "oldId": "privasea",
+      "newId": "privasea-ai",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "PRXVT by Virtuals",
+      "symbol": "PRXVT",
+      "oldId": "prxvt",
+      "newId": "prxvt-by-virtuals",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "ZKLSOL",
+      "symbol": "ZKFG",
+      "oldId": "zkfairlaunch",
+      "newId": "zklsol",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Ryo Currency",
+      "symbol": "RYO",
+      "oldId": "ryo-currency",
+      "newId": "ryo",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Voidify",
+      "symbol": "∅",
+      "oldId": "voidify",
+      "newId": "-7",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Scala",
+      "symbol": "XLA",
+      "oldId": "scala",
+      "newId": "stellite",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Tritcoin",
+      "symbol": "TRIT",
+      "oldId": "tritanium",
+      "newId": "tritcoin",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "PRivaCY Coin",
+      "symbol": "PRCY",
+      "oldId": "privacy-coin",
+      "newId": "prcy-coin",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "Spectre",
+      "symbol": "SPR",
+      "oldId": "spectre-dividend-token",
+      "newId": "spectre-network",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "OSCA Stack",
+      "symbol": "OSCA",
+      "oldId": "osca",
+      "newId": "osca-stack",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    },
+    {
+      "databaseName": "BlockWallet",
+      "symbol": "BLANK",
+      "oldId": "blockwallet",
+      "newId": "blank",
+      "confidence": "high",
+      "reason": "Exact name and symbol match"
+    }
+  ]
+}

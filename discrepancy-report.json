@@ -1,0 +1,491 @@
+{
+  "totalCoins": 99,
+  "totalDiscrepancies": 43,
+  "discrepanciesByType": {
+    "privacy_level": 0,
+    "technology": 1,
+    "new": 16,
+    "missing": 26
+  },
+  "discrepancies": [
+    {
+      "coinId": "zencash",
+      "name": "Horizen",
+      "type": "new",
+      "database": {
+        "name": "Horizen",
+        "symbol": "ZEN",
+        "coinId": "zencash",
+        "fullDescription": "Horizen is a privacy-focused blockchain platform that implements zk-SNARKs technology (forked from Zcash) while expanding into sidechain infrastructure and broader blockchain applications. Launched in 2017 as ZenCash, it provides optional shielded transactions similar to Zcash, where users can choose between transparent and private addresses. Horizen's vision extends beyond simple transactions to include private messaging, domain frontiers, and a sidechain platform (Zendoo) for deploying decentralized applications. The network uses a large node infrastructure with over 40,000 nodes globally to maintain security and decentralization.",
+        "privacySolutionSummary": "Optional privacy through zk-SNARKs shielded transactions combined with sidechain privacy features, allowing users to choose between transparent and completely private transactions.",
+        "privacyTechCategory": "zk-SNARKs / Sidechain Privacy",
+        "securityRating": 8,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "Horizen achieves High privacy through its zk-SNARK implementation, providing the same cryptographic privacy guarantees as Zcash when using shielded addresses. Transactions between shielded addresses are mathematically proven to hide sender, receiver, and amounts. The sidechain architecture adds additional privacy possibilities through isolated environments. However, like Zcash, privacy is optional rather than mandatory, and the actual privacy achieved depends on shielded pool usage. The large node network enhances resistance to network-level analysis. Strong cryptographic foundation with proven technology warrants High rating despite optional nature."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "zcoin",
+      "name": "Firo",
+      "type": "new",
+      "database": {
+        "name": "Firo",
+        "symbol": "FIRO",
+        "coinId": "zcoin",
+        "fullDescription": "Firo (formerly Zcoin) is a privacy coin implementing the Lelantus privacy protocol, which it developed in-house. Lelantus allows users to burn coins of any amount and redeem them later without revealing which burned coins are being spent, breaking the transaction link. The protocol provides high anonymity sets (up to 100,000+ coins in the anonymity pool) without requiring a trusted setup like zk-SNARKs. Firo also implements Dandelion++ for network-level privacy. The privacy features are optional—users can choose between transparent and private transactions. Firo has a strong focus on privacy research and regularly publishes academic papers.",
+        "privacySolutionSummary": "Optional privacy using Lelantus protocol for burning and redeeming coins with large anonymity sets, providing transaction unlinkability without trusted setup requirements.",
+        "privacyTechCategory": "Lelantus / Privacy Coin Protocol",
+        "securityRating": 8,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "Firo achieves High privacy through its innovative Lelantus protocol, which provides cryptographically strong privacy without the trusted setup concerns of zk-SNARKs. Users can burn and mint coins in large anonymity sets (65,000+), making transaction tracing mathematically infeasible. The privacy guarantees are strong and academically vetted. However, privacy is optional rather than mandatory, which can reduce the effective anonymity set if few users employ the feature. The Lelantus protocol represents original privacy research with solid cryptographic foundations, offering comparable privacy to established zk-SNARK systems but with different trust assumptions."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "airtor-protocol",
+      "name": "ANyONe Protocol",
+      "type": "new",
+      "database": {
+        "name": "ANyONe Protocol",
+        "symbol": "ANYONE",
+        "coinId": "airtor-protocol",
+        "fullDescription": "ANyONe Protocol is a privacy-focused cryptocurrency implementing ring signatures and stealth addresses similar to Monero's privacy model. It aims to provide mandatory privacy-by-default for all transactions while potentially adding additional privacy features. Limited mainstream documentation suggests it's a smaller project building on established CryptoNote-style privacy technology.",
+        "privacySolutionSummary": "Privacy-by-default using ring signatures to hide senders and stealth addresses to obscure recipients, following proven CryptoNote privacy principles.",
+        "privacyTechCategory": "Ring Signatures + Stealth Addresses",
+        "securityRating": 6,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "ANyONe Protocol achieves High privacy through its implementation of ring signatures and stealth addresses, which are proven technologies for transaction privacy. Ring signatures hide the sender among decoys while stealth addresses prevent recipient tracking—the same approach that makes Monero highly private. The cryptographic foundations are well-understood and mathematically sound. However, as a smaller project with limited public documentation and adoption, it lacks the extensive security auditing, large anonymity sets, and battle-testing of established privacy coins. The technology is capable of high privacy, but implementation quality and network effects are uncertain."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "veil-token",
+      "name": "Veil Token",
+      "type": "new",
+      "database": {
+        "name": "Veil Token",
+        "symbol": "VEIL",
+        "coinId": "veil-token",
+        "fullDescription": "Veil is a privacy cryptocurrency focused on always-on anonymity, combining multiple privacy technologies including Zerocoin protocol and RingCT. The project aimed to create a privacy coin where privacy is not just optional but unavoidable, with all transactions private by default. Veil has faced development challenges and underwent significant protocol changes during its evolution.",
+        "privacySolutionSummary": "Multi-layered privacy approach combining Zerocoin and RingCT technologies for mandatory transaction privacy across all network activities.",
+        "privacyTechCategory": "zk-SNARKs / Privacy Token",
+        "securityRating": 5,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "Veil aims for High privacy through its combination of privacy technologies and mandatory privacy approach. When functioning as designed, the multi-layered privacy should provide strong anonymity with all transactions shielded. However, the project has experienced significant development challenges, protocol vulnerabilities, and required hard forks to address security issues. The ambitious goal of combining multiple privacy systems introduces complexity that can create implementation vulnerabilities. While the theoretical privacy model is strong (warranting High rating), in practice, Veil has struggled with security and stability issues that undermine confidence. The privacy potential exists but execution has been problematic."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "beam-2",
+      "name": "BEAM",
+      "type": "new",
+      "database": {
+        "name": "BEAM",
+        "symbol": "BEAM",
+        "coinId": "beam-2",
+        "fullDescription": "BEAM is a confidential cryptocurrency implementing the MimbleWimble protocol with Lelantus-MW enhancements for maximum privacy. Launched in January 2019, BEAM provides privacy-by-default where all transactions are confidential with no addresses stored on the blockchain and all amounts hidden. The protocol uses Confidential Transactions, CoinJoin, and stealth addresses for comprehensive privacy. BEAM has evolved into a confidential DeFi platform with features like private smart contracts via the Beam Virtual Machine, confidential assets, private DEX, and bridges to other chains. The project emphasizes scalability through cut-through technology that prunes old transaction data.",
+        "privacySolutionSummary": "MimbleWimble with Lelantus-MW providing mandatory confidential transactions, no public addresses, hidden amounts, and privacy-preserving DeFi capabilities.",
+        "privacyTechCategory": "MimbleWimble",
+        "securityRating": 8,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "BEAM achieves High privacy through its comprehensive MimbleWimble implementation enhanced with Lelantus-MW. The protocol provides no addresses (preventing address tracking), fully confidential amounts (via Confidential Transactions), and sender privacy (through CoinJoin). The Lelantus-MW addition enables breaking transaction linkability with large anonymity sets (up to 64,000). All transactions are mandatorily private, ensuring maximum anonymity sets. The cut-through feature enhances privacy by removing spent transaction data. However, MimbleWimble has some known limitations including transaction interactivity requirements and potential network-level analysis vulnerabilities. Overall, BEAM provides strong mathematical privacy guarantees with practical usability."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "ghostwareos",
+      "name": "GhostwareOS",
+      "type": "new",
+      "database": {
+        "name": "GhostwareOS",
+        "symbol": "GHOST",
+        "coinId": "ghostwareos",
+        "fullDescription": "GhostwareOS appears to be a confidential computing platform using Trusted Execution Environment technology. Limited public information suggests it focuses on private computation and secure application execution. TEE-based approach targets enterprise or application-level privacy.",
+        "privacySolutionSummary": "TEE-based confidential computing platform for private application execution and secure computation environments.",
+        "privacyTechCategory": "TEE / Confidential Computing",
+        "securityRating": 5,
+        "privacyLevel": "Minimal",
+        "privacyLevelExplanation": "GhostwareOS receives a Minimal privacy rating because it relies on TEE technology, which has well-documented hardware vulnerabilities including side-channel attacks (Spectre, Meltdown, etc.). TEE privacy depends on trusting hardware manufacturers and firmware security, with larger attack surfaces than cryptographic solutions. Limited public documentation makes thorough assessment difficult. For transaction privacy, TEE-based solutions provide weaker guarantees than cryptographic methods. While potentially useful for certain enterprise confidential computing scenarios, TEE foundations mean it cannot achieve high-assurance privacy for financial anonymity."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "data-ownership-protocol-2",
+      "name": "Data Ownership Protocol 2",
+      "type": "technology",
+      "existing": "MPC",
+      "database": "TEE",
+      "reason": "Technology category differs: MPC → TEE (from \"Confidential Computing / MPC\")",
+      "impact": "Table and detail page will show database value"
+    },
+    {
+      "coinId": "mute-swap-by-virtuals",
+      "name": "MUTE SWAP by Virtuals",
+      "type": "new",
+      "database": {
+        "name": "MUTE SWAP by Virtuals",
+        "symbol": "MUTE",
+        "coinId": "mute-swap-by-virtuals",
+        "fullDescription": "MUTE is a privacy-focused decentralized exchange on zkSync (Ethereum Layer 2) implementing zk-SNARK mixer technology. It enables private token swaps where trade details remain confidential through zero-knowledge proofs. The platform combines AMM (Automated Market Maker) functionality with privacy features, allowing users to trade while protecting their transaction details from public view.",
+        "privacySolutionSummary": "zk-SNARK-based DEX mixer on zkSync Layer 2, enabling private token swaps with cryptographically protected trade details.",
+        "privacyTechCategory": "zk-SNARKs Mixer",
+        "securityRating": 7,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "MUTE achieves High privacy through zk-SNARK implementation that cryptographically hides swap details including amounts, tokens, and participants. The zero-knowledge proofs provide mathematical guarantees for trade privacy while maintaining verifiable correctness. Building on zkSync Layer 2 adds additional privacy and scalability benefits. However, effectiveness depends on liquidity in privacy pools and careful usage to avoid linkability when entering/exiting the privacy layer. As a DEX-focused privacy solution rather than a general payment coin, the use case is more limited. The cryptographic foundation is strong, and private DeFi trading represents important privacy infrastructure. Newer protocol with less battle-testing than established privacy coins."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "nonos-2",
+      "name": "NONOS",
+      "type": "new",
+      "database": {
+        "name": "NONOS",
+        "symbol": "NOX",
+        "coinId": "nonos-2",
+        "fullDescription": "NONOS appears to be a project with optional privacy features and mixer capabilities. Limited public information suggests it provides selective transaction privacy rather than mandatory privacy-by-default.",
+        "privacySolutionSummary": "Optional privacy features with mixing capabilities for selective transaction anonymity.",
+        "privacyTechCategory": "Optional Privacy / Mixer",
+        "securityRating": 5,
+        "privacyLevel": "Minimal",
+        "privacyLevelExplanation": "NONOS receives a Minimal privacy rating because privacy is optional, and limited information suggests basic mixing rather than advanced cryptographic privacy. Optional privacy systems typically have small anonymity sets as most users don't activate privacy features. Without details on the privacy technology (whether cryptographic or simple mixing), it's difficult to assess strength. The minimal public documentation and limited adoption suggest this is not a robust privacy solution. Optional privacy with small user bases provides minimal effective anonymity."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "session-token",
+      "name": "Session Token",
+      "type": "new",
+      "database": {
+        "name": "Session Token",
+        "symbol": "SESH",
+        "coinId": "session-token",
+        "fullDescription": "Session is a privacy-focused messaging application using onion routing and encrypted communications. The Session token (SESH) is used within the Session ecosystem for incentivizing service nodes and network operations. The primary focus is encrypted, metadata-resistant messaging rather than payment privacy, using onion routing similar to Tor for network anonymity.",
+        "privacySolutionSummary": "Onion routing and encrypted messaging with network-level privacy for communications, with token used for network incentives.",
+        "privacyTechCategory": "Onion Routing / Encrypted Messaging",
+        "securityRating": 6,
+        "privacyLevel": "Minimal",
+        "privacyLevelExplanation": "Session Token receives a Minimal privacy rating for cryptocurrency transactions because it's fundamentally a messaging privacy token rather than a payment privacy coin. The onion routing provides excellent network-level privacy for messages (hiding IP addresses, metadata), but token transactions themselves are typically transparent on-chain. The privacy focus is on communication anonymity rather than financial privacy. While the messaging privacy is strong (using proven onion routing technology), the token doesn't provide the transaction-level privacy that privacy coin users seek. Excellent for private messaging but minimal for financial transaction anonymity."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "prxvt-by-virtuals",
+      "name": "PRXVT by Virtuals",
+      "type": "new",
+      "database": {
+        "name": "PRXVT by Virtuals",
+        "symbol": "PRXVT",
+        "coinId": "prxvt-by-virtuals",
+        "fullDescription": "PRXVT is a privacy layer implementing zk-SNARKs for private transactions and DeFi interactions. It provides privacy infrastructure that can be integrated with various applications requiring transaction confidentiality.",
+        "privacySolutionSummary": "zk-SNARK-based privacy layer enabling private transactions and confidential DeFi interactions with cryptographic guarantees.",
+        "privacyTechCategory": "zk-SNARKs / Privacy Layer",
+        "securityRating": 7,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "PRXVT achieves High privacy through zk-SNARK implementation that cryptographically hides transaction details including amounts, participants, and activities. The zero-knowledge proofs provide mathematical guarantees for privacy while maintaining verifiability. As a privacy layer, it can extend privacy to various applications and use cases. However, effectiveness depends on proper integration and usage—entering/exiting the privacy layer can create linkability. Limited public information and newer status mean less battle-testing than established privacy coins. The cryptographic foundation is robust, and the privacy layer approach is valuable for extending privacy to multiple applications. Sound technology with high privacy potential."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "ryo",
+      "name": "Ryo Currency",
+      "type": "new",
+      "database": {
+        "name": "Ryo Currency",
+        "symbol": "RYO",
+        "coinId": "ryo",
+        "fullDescription": "Ryo Currency is a CryptoNote-based privacy cryptocurrency implementing ring signatures and stealth addresses with enhanced privacy features. It builds on Monero's technology while implementing additional privacy improvements including higher ring sizes and enforced privacy measures. Ryo focuses on maximum privacy as its core principle.",
+        "privacySolutionSummary": "Enhanced CryptoNote implementation with ring signatures and stealth addresses, featuring increased ring sizes and mandatory privacy.",
+        "privacyTechCategory": "Ring Signatures + Stealth",
+        "securityRating": 7,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "Ryo achieves High privacy through enhanced CryptoNote implementation with larger ring sizes than standard implementations, providing stronger sender anonymity. Ring signatures with more decoys make transaction tracking more difficult, while stealth addresses prevent recipient identification. Mandatory privacy means all transactions contribute to the anonymity set. The cryptographic foundation is well-established through CryptoNote technology. However, as a smaller project with limited adoption, Ryo has smaller anonymity sets in practice and less extensive security auditing than Monero. The privacy enhancements (larger rings) improve upon proven technology, warranting High rating despite smaller network effects."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "-7",
+      "name": "Voidify",
+      "type": "new",
+      "database": {
+        "name": "Voidify",
+        "symbol": "∅",
+        "coinId": "-7",
+        "fullDescription": "Voidify implements ring signatures and stealth addresses for privacy-by-default transactions, following CryptoNote-style privacy principles with mandatory privacy for all network participants.",
+        "privacySolutionSummary": "Privacy-by-default using ring signatures for sender anonymity and stealth addresses for recipient privacy.",
+        "privacyTechCategory": "Ring Signatures / Stealth",
+        "securityRating": 6,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "Voidify achieves High privacy through ring signatures and stealth addresses—proven cryptographic technologies providing strong anonymity. Ring signatures hide senders among decoys while stealth addresses prevent recipient tracking. Mandatory privacy means all transactions contribute to the anonymity set. The cryptographic foundation is well-understood and mathematically sound. However, as a newer, smaller project with limited public information, there are concerns about implementation quality, security auditing, and network size. The privacy technology is capable of providing strong anonymity, but real-world effectiveness depends on adoption and continued development. Sound cryptographic principles warrant High rating despite limited track record."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "stellite",
+      "name": "Scala",
+      "type": "new",
+      "database": {
+        "name": "Scala",
+        "symbol": "XLA",
+        "coinId": "stellite",
+        "fullDescription": "Scala is a cryptocurrency combining confidential ledger technology with zk-SNARKs for transaction privacy. It aims to provide cryptographic privacy guarantees for digital currency transactions.",
+        "privacySolutionSummary": "Confidential ledger with zk-SNARK implementation for cryptographically private transactions.",
+        "privacyTechCategory": "Confidential Ledger / zk-SNARKs",
+        "securityRating": 6,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "Scala achieves High privacy through zk-SNARK technology that mathematically hides transaction details. Zero-knowledge proofs provide cryptographic guarantees for confidentiality of amounts and participants. The combination of confidential ledger approaches with zk-SNARKs suggests comprehensive privacy design. However, limited public information and smaller ecosystem mean less extensive security auditing and testing. The cryptographic foundation (zk-SNARKs) is robust and proven in other implementations. Privacy technology is theoretically strong, warranting High rating, though practical assessment is difficult due to limited documentation and adoption."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "prcy-coin",
+      "name": "PRivaCY Coin",
+      "type": "new",
+      "database": {
+        "name": "PRivaCY Coin",
+        "symbol": "PRCY",
+        "coinId": "prcy-coin",
+        "fullDescription": "PRivaCY Coin implements ring signatures and confidential transactions for privacy-by-default, combining multiple privacy technologies for enhanced anonymity.",
+        "privacySolutionSummary": "Ring signatures combined with confidential transactions for multi-layered mandatory privacy.",
+        "privacyTechCategory": "Ring Signatures / Confidential Transactions",
+        "securityRating": 7,
+        "privacyLevel": "High",
+        "privacyLevelExplanation": "PRivaCY Coin achieves High privacy through combination of ring signatures (hiding senders) and confidential transactions (hiding amounts), providing comprehensive transaction privacy. The multi-layered approach addresses multiple privacy vectors simultaneously. Ring signatures and confidential transactions are both mathematically proven privacy technologies. Mandatory privacy means all transactions contribute to the anonymity set. The cryptographic foundation is solid, building on well-established privacy techniques. However, as a smaller project with limited mainstream adoption, there's less extensive battle-testing and security auditing than major privacy coins. The privacy technology is robust, combining proven methods for strong anonymity."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "spectre-network",
+      "name": "Spectre",
+      "type": "new",
+      "database": {
+        "name": "Spectre",
+        "symbol": "SPR",
+        "coinId": "spectre-network",
+        "fullDescription": "Spectre implements RingCT with optional privacy features, providing confidential transaction capabilities that users can selectively employ.",
+        "privacySolutionSummary": "RingCT with optional privacy for selective confidential transactions.",
+        "privacyTechCategory": "RingCT / Optional Privacy",
+        "securityRating": 6,
+        "privacyLevel": "Medium",
+        "privacyLevelExplanation": "Spectre receives a Medium privacy rating because while RingCT provides strong cryptographic privacy (hiding amounts and providing unlinkability), the optional nature significantly reduces effectiveness. When privacy is optional, most transactions are transparent, creating small anonymity sets for those using privacy features. RingCT is proven technology (used successfully in Monero), but without mandatory privacy, the practical privacy achieved is limited. Users employing privacy features get cryptographic protection, but the optional model means fewer participants and higher visibility of private transactions. Better than minimal privacy but not reaching High-level consistent anonymity."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "blank",
+      "name": "BlockWallet",
+      "type": "new",
+      "database": {
+        "name": "BlockWallet",
+        "symbol": "BLANK",
+        "coinId": "blank",
+        "fullDescription": "BlockWallet is a privacy-focused Ethereum wallet providing confidential transaction capabilities through privacy-enhancing features for ERC-20 tokens and ETH.",
+        "privacySolutionSummary": "Confidential wallet with privacy features for private Ethereum and ERC-20 transactions.",
+        "privacyTechCategory": "Confidential Wallet / Private Transactions",
+        "securityRating": 6,
+        "privacyLevel": "Minimal",
+        "privacyLevelExplanation": "BlockWallet receives a Minimal privacy rating because as a wallet-level privacy solution for Ethereum, it cannot fundamentally change the transparency of the Ethereum blockchain. Wallet privacy features may include routing through privacy services or implementing stealth addresses, but underlying transactions typically remain traceable on-chain. True privacy on transparent blockchains requires protocol-level solutions (zk-SNARKs, mixers) rather than wallet-level obfuscation. While the wallet may enhance privacy compared to standard Ethereum wallets, it can't provide the same guarantees as purpose-built privacy blockchains. Useful for some privacy protection but insufficient for strong anonymity."
+      },
+      "reason": "Coin exists in database but not in current metadata",
+      "impact": "Will be added to metadata"
+    },
+    {
+      "coinId": "horizen",
+      "name": "horizen",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "firo",
+      "name": "firo",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "anyone-protocol",
+      "name": "anyone-protocol",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "veil",
+      "name": "veil",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "beam",
+      "name": "beam",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "ghostware-os",
+      "name": "ghostware-os",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "mute",
+      "name": "mute",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "nonos",
+      "name": "nonos",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "session",
+      "name": "session",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "prxvt",
+      "name": "prxvt",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "ghost",
+      "name": "ghost",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "ryo-currency",
+      "name": "ryo-currency",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "voidify",
+      "name": "voidify",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "scala",
+      "name": "scala",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "privacy-coin",
+      "name": "privacy-coin",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "spectre",
+      "name": "spectre",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "blockwallet",
+      "name": "blockwallet",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "houdiniswap",
+      "name": "houdiniswap",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "tari",
+      "name": "tari",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "dop",
+      "name": "dop",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "navcoin",
+      "name": "navcoin",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "privasea",
+      "name": "privasea",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "zkfairlaunch",
+      "name": "zkfairlaunch",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "tritanium",
+      "name": "tritanium",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "spectre-dividend-token",
+      "name": "spectre-dividend-token",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    },
+    {
+      "coinId": "osca",
+      "name": "osca",
+      "type": "missing",
+      "reason": "Coin exists in current metadata but not in database",
+      "impact": "Will keep existing metadata"
+    }
+  ]
+}

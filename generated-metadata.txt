@@ -1,0 +1,43 @@
+// AUTO-GENERATED FILE - DO NOT EDIT MANUALLY
+// Generated: 2025-11-19T04:38:09.526Z
+// Source: CoinPaprika API + Automated Categorization
+
+export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
+  "zcash": {
+      "coinId": "zcash",
+      "technology": "Other",
+      "specificTechnology": "TEE",
+      "privacyScore": 70,
+      "features": {
+          "hiddenAmounts": false,
+          "hiddenSender": false,
+          "hiddenRecipient": false,
+          "defaultPrivacy": false,
+          "ipObfuscation": false
+      },
+      "technologyDescription": "Utilizes TEE for privacy.  (Data source: CoinPaprika + automated categorization)",
+      "whitepaperUrl": "https://static.coinpaprika.com/storage/cdn/whitepapers/47.pdf",
+      "sourceCode": "https://github.com/zcash/zcash",
+      "releaseYear": 2016,
+      "isEnhanced": true
+  },
+
+  "litecoin": {
+      "coinId": "litecoin",
+      "technology": "Other",
+      "specificTechnology": "Tor/I2P",
+      "privacyScore": 70,
+      "features": {
+          "hiddenAmounts": false,
+          "hiddenSender": false,
+          "hiddenRecipient": false,
+          "defaultPrivacy": false,
+          "ipObfuscation": false
+      },
+      "technologyDescription": "Utilizes Tor/I2P for privacy.  (Data source: CoinPaprika + automated categorization)",
+      "whitepaperUrl": null,
+      "sourceCode": "https://github.com/litecoin-project/litecoin",
+      "releaseYear": 2011,
+      "isEnhanced": true
+  }
+};
