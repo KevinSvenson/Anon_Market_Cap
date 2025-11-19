@@ -70,6 +70,8 @@ export interface Cryptocurrency {
   low_24h: number;
   price_change_24h: number;
   price_change_percentage_24h: number;
+  price_change_percentage_1h_in_currency?: number;
+  price_change_percentage_7d_in_currency?: number;
   market_cap_change_24h: number;
   market_cap_change_percentage_24h: number;
   circulating_supply: number;
@@ -409,7 +411,7 @@ export async function fetchPrivacyCoins(
     }
 
     const response = await fetch(
-      `${COINGECKO_API_BASE}/coins/markets?vs_currency=usd&category=privacy-coins&order=market_cap_desc&per_page=${limit}&page=${page}&sparkline=true&price_change_percentage=24h`
+      `${COINGECKO_API_BASE}/coins/markets?vs_currency=usd&category=privacy-coins&order=market_cap_desc&per_page=${limit}&page=${page}&sparkline=true&price_change_percentage=1h,24h,7d`
     );
 
     // Handle rate limiting (429 status)

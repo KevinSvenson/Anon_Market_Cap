@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import InlinePriceChart from "./InlinePriceChart";
 
 /**
- * Formats a number as currency
+ * Formats a number as abbreviated currency (for volume)
  */
 const formatCurrency = (num: number): string => {
   if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
@@ -23,6 +23,13 @@ const formatCurrency = (num: number): string => {
 };
 
 /**
+ * Formats market cap as full number with commas
+ */
+const formatMarketCapFull = (num: number): string => {
+  return `$${num.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+};
+
+/**
  * Formats a price value
  */
 const formatPrice = (num: number): string => {
@@ -30,7 +37,7 @@ const formatPrice = (num: number): string => {
   return `$${num.toFixed(6)}`;
 };
 
-type SortColumn = "market_cap_rank" | "name" | "current_price" | "market_cap" | "price_change_percentage_24h";
+type SortColumn = "market_cap_rank" | "name" | "current_price" | "market_cap" | "price_change_percentage_1h_in_currency" | "price_change_percentage_24h" | "price_change_percentage_7d_in_currency" | "total_volume";
 type SortDirection = "asc" | "desc" | null;
 
 const CryptoTable = () => {
@@ -109,9 +116,21 @@ const CryptoTable = () => {
           aValue = a.market_cap ?? 0;
           bValue = b.market_cap ?? 0;
           break;
+        case "price_change_percentage_1h_in_currency":
+          aValue = a.price_change_percentage_1h_in_currency ?? 0;
+          bValue = b.price_change_percentage_1h_in_currency ?? 0;
+          break;
         case "price_change_percentage_24h":
           aValue = a.price_change_percentage_24h ?? 0;
           bValue = b.price_change_percentage_24h ?? 0;
+          break;
+        case "price_change_percentage_7d_in_currency":
+          aValue = a.price_change_percentage_7d_in_currency ?? 0;
+          bValue = b.price_change_percentage_7d_in_currency ?? 0;
+          break;
+        case "total_volume":
+          aValue = a.total_volume ?? 0;
+          bValue = b.total_volume ?? 0;
           break;
         default:
           return 0;
@@ -379,7 +398,7 @@ const CryptoTable = () => {
                 </div>
               </th>
               <th 
-                className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden md:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
+                className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden lg:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("market_cap")}
               >
                 <div className="flex items-center justify-end">
@@ -388,23 +407,50 @@ const CryptoTable = () => {
                 </div>
               </th>
               <th 
+                className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden lg:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
+                onClick={() => handleSort("total_volume")}
+              >
+                <div className="flex items-center justify-end">
+                  24h Volume
+                  {getSortIcon("total_volume")}
+                </div>
+              </th>
+              <th 
+                className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden xl:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
+                onClick={() => handleSort("price_change_percentage_1h_in_currency")}
+              >
+                <div className="flex items-center justify-end">
+                  1h
+                  {getSortIcon("price_change_percentage_1h_in_currency")}
+                </div>
+              </th>
+              <th 
                 className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("price_change_percentage_24h")}
               >
-                <div className="flex items-center justify-end gap-2">
-                  <span>24h</span>
+                <div className="flex items-center justify-end">
+                  24h
                   {getSortIcon("price_change_percentage_24h")}
                 </div>
               </th>
+              <th 
+                className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden md:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
+                onClick={() => handleSort("price_change_percentage_7d_in_currency")}
+              >
+                <div className="flex items-center justify-end">
+                  7d
+                  {getSortIcon("price_change_percentage_7d_in_currency")}
+                </div>
+              </th>
               <th className="px-3 sm:px-4 py-3 text-center text-xs sm:text-sm font-semibold text-muted-foreground hidden sm:table-cell">
-                Chart
+                Last 7 Days
               </th>
             </tr>
           </thead>
           <tbody>
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-3 sm:px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={9} className="px-3 sm:px-4 py-8 text-center text-muted-foreground">
                   {searchQuery ? "No coins found matching your search." : "No cryptocurrency data available"}
                 </td>
               </tr>
@@ -450,29 +496,66 @@ const CryptoTable = () => {
                     ? formatPrice(crypto.current_price)
                     : "N/A"}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right text-xs sm:text-sm text-muted-foreground hidden md:table-cell whitespace-nowrap">
+                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right text-xs sm:text-sm text-foreground hidden lg:table-cell whitespace-nowrap">
                   {crypto.market_cap != null 
-                    ? formatCurrency(crypto.market_cap)
+                    ? formatMarketCapFull(crypto.market_cap)
                     : "N/A"}
                 </td>
+                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right text-xs sm:text-sm text-muted-foreground hidden lg:table-cell whitespace-nowrap">
+                  {crypto.total_volume != null 
+                    ? formatCurrency(crypto.total_volume)
+                    : "N/A"}
+                </td>
+                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right hidden xl:table-cell">
+                  {crypto.price_change_percentage_1h_in_currency != null ? (
+                    <span
+                      className={cn(
+                        "text-xs sm:text-sm font-medium whitespace-nowrap",
+                        crypto.price_change_percentage_1h_in_currency >= 0
+                          ? "text-positive"
+                          : "text-negative"
+                      )}
+                    >
+                      {crypto.price_change_percentage_1h_in_currency >= 0 ? "+" : ""}
+                      {crypto.price_change_percentage_1h_in_currency.toFixed(1)}%
+                    </span>
+                  ) : (
+                    <span className="text-xs sm:text-sm text-muted-foreground">N/A</span>
+                  )}
+                </td>
                 <td className="px-3 sm:px-4 py-3 sm:py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    {crypto.price_change_percentage_24h != null ? (
-                      <span
-                        className={cn(
-                          "text-xs sm:text-sm font-medium whitespace-nowrap",
-                          crypto.price_change_percentage_24h >= 0
-                            ? "text-positive"
-                            : "text-negative"
-                        )}
-                      >
-                        {crypto.price_change_percentage_24h >= 0 ? "+" : ""}
-                        {crypto.price_change_percentage_24h.toFixed(2)}%
-                      </span>
-                    ) : (
-                      <span className="text-xs sm:text-sm text-muted-foreground">N/A</span>
-                    )}
-                  </div>
+                  {crypto.price_change_percentage_24h != null ? (
+                    <span
+                      className={cn(
+                        "text-xs sm:text-sm font-medium whitespace-nowrap",
+                        crypto.price_change_percentage_24h >= 0
+                          ? "text-positive"
+                          : "text-negative"
+                      )}
+                    >
+                      {crypto.price_change_percentage_24h >= 0 ? "+" : ""}
+                      {crypto.price_change_percentage_24h.toFixed(1)}%
+                    </span>
+                  ) : (
+                    <span className="text-xs sm:text-sm text-muted-foreground">N/A</span>
+                  )}
+                </td>
+                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right hidden md:table-cell">
+                  {crypto.price_change_percentage_7d_in_currency != null ? (
+                    <span
+                      className={cn(
+                        "text-xs sm:text-sm font-medium whitespace-nowrap",
+                        crypto.price_change_percentage_7d_in_currency >= 0
+                          ? "text-positive"
+                          : "text-negative"
+                      )}
+                    >
+                      {crypto.price_change_percentage_7d_in_currency >= 0 ? "+" : ""}
+                      {crypto.price_change_percentage_7d_in_currency.toFixed(1)}%
+                    </span>
+                  ) : (
+                    <span className="text-xs sm:text-sm text-muted-foreground">N/A</span>
+                  )}
                 </td>
                 <td className="px-3 sm:px-4 py-3 sm:py-4 text-center hidden sm:table-cell">
                   <InlinePriceChart

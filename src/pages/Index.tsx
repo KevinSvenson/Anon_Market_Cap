@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import CryptoTable from "@/components/CryptoTable";
-import MarketCapChart from "@/components/MarketCapChart";
+import MarketCapCard from "@/components/MarketCapCard";
+import TopGainers from "@/components/TopGainers";
 import { 
-  fetchPrivacyCoinCategoryStats, 
+  fetchPrivacyCoinCategoryStats,
+  fetchPrivacyCoins,
   RateLimitError,
   NetworkError 
 } from "@/services/coingecko";
@@ -38,22 +40,17 @@ const Index = () => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
+  const { data: privacyCoins } = useQuery({
+    queryKey: ["privacyCoins"],
+    queryFn: () => fetchPrivacyCoins(100, 1),
+    refetchInterval: 185000, // Refetch every 3 minutes 5 seconds
+    staleTime: 120000, // Consider data fresh for 2 minutes
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+
   const marketCap = privacyStats?.market_cap;
   const marketCapChange = privacyStats?.market_cap_change_24h;
-  const volume24h = privacyStats?.volume_24h;
-
-  const formatMarketCap = (num: number) => {
-    if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
-    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-    return `$${num.toLocaleString()}`;
-  };
-
-  const formatVolume = (num: number) => {
-    if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
-    if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-    if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
-    return `$${num.toLocaleString()}`;
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,47 +61,17 @@ const Index = () => {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-4 sm:mb-6">
             Privacy Cryptocurrency Prices by Market Cap
           </h1>
-          <div className="space-y-2">
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
-              {privacyError ? (
-                <span className="text-destructive">
-                  {privacyError instanceof RateLimitError 
-                    ? "Rate limit exceeded. Data will refresh automatically."
-                    : privacyError instanceof NetworkError
-                    ? "Network error. Please check your connection."
-                    : "Unable to load privacy coin data."}
-                </span>
-              ) : marketCap != null && marketCapChange != null ? (
-                <>
-                  The privacy coin market cap is {formatMarketCap(marketCap)}, a{" "}
-                  <span
-                    className={
-                      marketCapChange >= 0 ? "text-positive" : "text-negative"
-                    }
-                  >
-                    {marketCapChange >= 0 ? "+" : ""}
-                    {marketCapChange.toFixed(1)}%
-                  </span>{" "}
-                  change over the last day.
-                </>
-              ) : (
-                "Loading privacy coin data..."
-              )}
-            </p>
-            {volume24h != null && !privacyError && (
-              <p className="text-sm sm:text-base text-muted-foreground">
-                24h Volume: {formatVolume(volume24h)}
-              </p>
-            )}
-          </div>
         </div>
 
-        {/* Market Cap Chart */}
-        <div className="mb-6">
-          <MarketCapChart
-            currentMarketCap={marketCap}
+        {/* Market Cap Card and Top Gainers/Losers */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <MarketCapCard
+            marketCap={marketCap}
             marketCapChange24h={marketCapChange}
           />
+          {privacyCoins && privacyCoins.length > 0 && (
+            <TopGainers coins={privacyCoins} />
+          )}
         </div>
 
         <CryptoTable />

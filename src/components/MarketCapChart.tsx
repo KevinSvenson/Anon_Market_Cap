@@ -222,14 +222,9 @@ const MarketCapChart = ({
   }
 
   return (
-    <div className="w-full rounded-lg border border-border bg-card p-4">
-      <div className="mb-2">
+    <div className="w-full">
+      <div className="px-4 mb-2">
         <h3 className="text-sm font-semibold text-foreground">24-Hour Market Cap Trend</h3>
-        <p className="text-xs text-muted-foreground">
-          {historicalData.length > 0 
-            ? `${historicalData.length} real data points, ${chartData.length} total points (24h range)`
-            : `Synthetic data (${chartData.length} points) - Estimated trend based on 24h change`}
-        </p>
       </div>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
