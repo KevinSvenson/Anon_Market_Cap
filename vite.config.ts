@@ -5,9 +5,10 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // GitHub Pages configuration
-  // If deploying to username.github.io/repo-name, use '/repo-name/'
-  // If deploying to username.github.io (custom domain), use '/'
+  // Base path configuration
+  // For custom domain: use '/'
+  // For GitHub Pages subdirectory (username.github.io/repo-name): use '/repo-name/'
+  // Set GITHUB_PAGES=true environment variable to use subdirectory path
   base: process.env.GITHUB_PAGES === 'true' ? '/Anon_Market_Cap/' : '/',
   build: {
     outDir: 'docs',
