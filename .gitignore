@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# GitHub Pages - docs folder should be committed
+# docs/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
