@@ -13,7 +13,7 @@ const Header = () => {
             className="flex items-center space-x-2 transition-opacity hover:opacity-80"
           >
             <img 
-              src="/anon-logo.png" 
+              src={`${import.meta.env.BASE_URL}anon-logo.png`}
               alt="AnonMarketCap Logo" 
               className="h-24 w-auto"
             />
