@@ -34,6 +34,7 @@ export interface PrivacyCoinMetadata {
   coinId: string; // CoinGecko ID
   technology: PrivacyTechnology;
   specificTechnology?: string; // Detailed variant (e.g., "zk-SNARKs Mixer", "CryptoNote")
+  displayTech?: string; // Short label to display in table badge (e.g., "Lelantus", "Tor", "ID-Link")
   privacyLevel: PrivacyLevel; // High, Medium, or Minimal
   privacyScore: number; // 0-100
   features: PrivacyFeatures;
@@ -189,6 +190,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "decred",
     technology: "Other",
     specificTechnology: "Transparent / Optional Privacy",
+    displayTech: "Optional",
     privacyLevel: "Minimal",
     privacyScore: 52,
     features: {
@@ -252,6 +254,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "concordium",
     technology: "Other",
     specificTechnology: "Identity-Linked Confidential Transactions",
+    displayTech: "ID-Link",
     privacyLevel: "Minimal",
     privacyScore: 56,
     features: {
@@ -336,6 +339,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "verge",
     technology: "Other",
     specificTechnology: "Tor / I2P Obfuscation",
+    displayTech: "Tor",
     privacyLevel: "Minimal",
     privacyScore: 54,
     features: {
@@ -378,6 +382,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "anoma",
     technology: "Other",
     specificTechnology: "zk-based Private Payments",
+    displayTech: "zk-based",
     privacyLevel: "High",
     privacyScore: 90,
     features: {
@@ -441,6 +446,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "firo",
     technology: "Other",
     specificTechnology: "Lelantus / Privacy Coin Protocol",
+    displayTech: "Lelantus",
     privacyLevel: "High",
     privacyScore: 91,
     features: {
@@ -567,6 +573,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "ergo",
     technology: "Other",
     specificTechnology: "Sigma Protocols / Confidential Transactions",
+    displayTech: "Sigma",
     privacyLevel: "Medium",
     privacyScore: 74,
     features: {
@@ -672,6 +679,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "pivx",
     technology: "Other",
     specificTechnology: "Zerocoin / Optional Privacy",
+    displayTech: "Zerocoin",
     privacyLevel: "Medium",
     privacyScore: 71,
     features: {
@@ -777,6 +785,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "telos",
     technology: "Other",
     specificTechnology: "Optional Private Transactions / Layered Privacy",
+    displayTech: "Layered",
     privacyLevel: "Minimal",
     privacyScore: 54,
     features: {
@@ -1302,6 +1311,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "nonos",
     technology: "Other",
     specificTechnology: "Optional Privacy / Mixer",
+    displayTech: "Optional",
     privacyLevel: "Minimal",
     privacyScore: 61,
     features: {
@@ -1323,6 +1333,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "nav-coin",
     technology: "Other",
     specificTechnology: "Optional Private Transactions / Dual Blockchain",
+    displayTech: "Dual",
     privacyLevel: "Minimal",
     privacyScore: 58,
     features: {
@@ -1365,6 +1376,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "session",
     technology: "Other",
     specificTechnology: "Onion Routing / Encrypted Messaging",
+    displayTech: "Onion",
     privacyLevel: "Minimal",
     privacyScore: 65,
     features: {
@@ -1718,6 +1730,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "nulltrace",
     technology: "Other",
     specificTechnology: "Optional Private Transactions / Mixer",
+    displayTech: "Mixer",
     privacyLevel: "Minimal",
     privacyScore: 60,
     features: {
@@ -1945,6 +1958,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "lethe",
     technology: "Other",
     specificTechnology: "Optional Privacy / Mixer",
+    displayTech: "Optional",
     privacyLevel: "Minimal",
     privacyScore: 60,
     features: {
@@ -2092,6 +2106,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "hushr",
     technology: "Other",
     specificTechnology: "Confidential Messaging / Mixer",
+    displayTech: "Mixer",
     privacyLevel: "Minimal",
     privacyScore: 60,
     features: {
@@ -2113,6 +2128,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "enkrion",
     technology: "Other",
     specificTechnology: "Confidential Ledger / Optional Privacy",
+    displayTech: "Optional",
     privacyLevel: "Minimal",
     privacyScore: 58,
     features: {
@@ -2218,6 +2234,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "navcoin",
     technology: "Other",
     specificTechnology: "Optional Private Transactions / Dual Blockchain",
+    displayTech: "Dual",
     privacyLevel: "Minimal",
     privacyScore: 45,
     features: {
@@ -2302,6 +2319,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "spectre-dividend-token",
     technology: "Other",
     specificTechnology: "RingCT / Optional Privacy",
+    displayTech: "RingCT",
     privacyLevel: "Medium",
     privacyScore: 65,
     features: {
@@ -2365,6 +2383,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "zcoin",
     technology: "Other",
     specificTechnology: "Lelantus / Privacy Coin Protocol",
+    displayTech: "Lelantus",
     privacyLevel: "High",
     privacyScore: 85,
     features: {
@@ -2491,6 +2510,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "nonos-2",
     technology: "Other",
     specificTechnology: "Optional Privacy / Mixer",
+    displayTech: "Optional",
     privacyLevel: "Minimal",
     privacyScore: 45,
     features: {
@@ -2512,6 +2532,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "session-token",
     technology: "Other",
     specificTechnology: "Onion Routing / Encrypted Messaging",
+    displayTech: "Onion",
     privacyLevel: "Minimal",
     privacyScore: 45,
     features: {
@@ -2638,6 +2659,7 @@ export const privacyMetadata: Record<string, PrivacyCoinMetadata> = {
     coinId: "spectre-network",
     technology: "Other",
     specificTechnology: "RingCT / Optional Privacy",
+    displayTech: "RingCT",
     privacyLevel: "Medium",
     privacyScore: 65,
     features: {

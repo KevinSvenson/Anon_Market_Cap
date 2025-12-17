@@ -9,9 +9,88 @@
  */
 
 // Use proxy in development to avoid CORS issues, direct API in production
-const COINGECKO_API_BASE = import.meta.env.DEV 
-  ? "/api/coingecko" 
-  : "https://api.coingecko.com/api/v3";
+// Fallback to direct API if proxy fails
+const getApiBase = () => {
+  if (import.meta.env.DEV) {
+    // Try proxy first, but we'll handle fallback in fetchWithRetry
+    return "/api/coingecko";
+  }
+  return "https://api.coingecko.com/api/v3";
+};
+
+const COINGECKO_API_BASE = getApiBase();
+const COINGECKO_DIRECT_API = "https://api.coingecko.com/api/v3";
+
+// Retry configuration
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000; // 2 seconds
+
+/**
+ * Fetch with automatic retry logic for transient errors
+ * Falls back to direct API if proxy fails in development
+ */
+const fetchWithRetry = async (
+  url: string, 
+  options: RequestInit = {},
+  retries = MAX_RETRIES,
+  useDirectApi = false
+): Promise<Response> => {
+  try {
+    // If proxy failed and we're in dev, try direct API
+    let fetchUrl = url;
+    if (useDirectApi && import.meta.env.DEV && url.startsWith('/api/coingecko')) {
+      fetchUrl = url.replace('/api/coingecko', COINGECKO_DIRECT_API);
+      console.log('Falling back to direct API:', fetchUrl);
+    }
+    
+    const response = await fetch(fetchUrl, {
+      ...options,
+      headers: {
+        'Accept': 'application/json',
+        ...options.headers,
+      },
+    });
+    
+    if (!response.ok) {
+      // Retry on transient errors
+      if (retries > 0 && (response.status === 504 || response.status === 500 || response.status === 429 || response.status === 503)) {
+        const retryAfter = response.headers.get('Retry-After');
+        const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : RETRY_DELAY;
+        
+        console.log(`API error ${response.status}, retrying... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return fetchWithRetry(url, options, retries - 1, useDirectApi);
+      }
+      
+      // Handle rate limiting
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const retrySeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;
+        throw new RateLimitError(`API rate limit exceeded. Please wait before making another request.`, retrySeconds);
+      }
+      
+      throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+    }
+    
+    return response;
+  } catch (error) {
+    // Retry on network errors, try direct API if proxy fails in dev
+    if (retries > 0) {
+      if (error instanceof TypeError || (error instanceof Error && error.message.includes('fetch'))) {
+        // If proxy failed and we haven't tried direct API yet, try it
+        if (import.meta.env.DEV && !useDirectApi && url.startsWith('/api/coingecko')) {
+          console.log('Proxy failed, trying direct API...');
+          return fetchWithRetry(url, options, retries, true);
+        }
+        
+        console.log(`Network error, retrying... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        return fetchWithRetry(url, options, retries - 1, useDirectApi);
+      }
+    }
+    throw error;
+  }
+};
 
 /**
  * Custom error class for API rate limit errors
@@ -163,29 +242,7 @@ export interface CoinDetail {
  */
 export async function fetchGlobalMarketData(): Promise<GlobalMarketData["data"]> {
   try {
-    const response = await fetch(`${COINGECKO_API_BASE}/global`);
-
-    // Handle rate limiting (429 status)
-    if (response.status === 429) {
-      const retryAfter = response.headers.get("Retry-After");
-      const retrySeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;
-      throw new RateLimitError(
-        "API rate limit exceeded. Please wait before making another request.",
-        retrySeconds
-      );
-    }
-
-    // Handle other HTTP errors
-    if (!response.ok) {
-      if (response.status >= 500) {
-        throw new Error(
-          `CoinGecko API server error (${response.status}). Please try again later.`
-        );
-      }
-      throw new Error(
-        `CoinGecko API error: ${response.status} ${response.statusText}`
-      );
-    }
+    const response = await fetchWithRetry(`${COINGECKO_API_BASE}/global`);
 
     const data: GlobalMarketData = await response.json();
     
@@ -237,31 +294,9 @@ export async function fetchTopCryptocurrencies(
       throw new Error("Page must be greater than 0");
     }
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${COINGECKO_API_BASE}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=${limit}&page=${page}&sparkline=false&price_change_percentage=24h`
     );
-
-    // Handle rate limiting (429 status)
-    if (response.status === 429) {
-      const retryAfter = response.headers.get("Retry-After");
-      const retrySeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;
-      throw new RateLimitError(
-        "API rate limit exceeded. Please wait before making another request.",
-        retrySeconds
-      );
-    }
-
-    // Handle other HTTP errors
-    if (!response.ok) {
-      if (response.status >= 500) {
-        throw new Error(
-          `CoinGecko API server error (${response.status}). Please try again later.`
-        );
-      }
-      throw new Error(
-        `CoinGecko API error: ${response.status} ${response.statusText}`
-      );
-    }
 
     const data: Cryptocurrency[] = await response.json();
     
@@ -308,31 +343,9 @@ export async function fetchTopCryptocurrencies(
  */
 export async function fetchPrivacyCoinCategoryStats(): Promise<PrivacyCoinCategoryStats> {
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${COINGECKO_API_BASE}/coins/categories?per_page=250&page=1`
     );
-
-    // Handle rate limiting (429 status)
-    if (response.status === 429) {
-      const retryAfter = response.headers.get("Retry-After");
-      const retrySeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;
-      throw new RateLimitError(
-        "API rate limit exceeded. Please wait before making another request.",
-        retrySeconds
-      );
-    }
-
-    // Handle other HTTP errors
-    if (!response.ok) {
-      if (response.status >= 500) {
-        throw new Error(
-          `CoinGecko API server error (${response.status}). Please try again later.`
-        );
-      }
-      throw new Error(
-        `CoinGecko API error: ${response.status} ${response.statusText}`
-      );
-    }
 
     const categories: CategoryData[] = await response.json();
     
@@ -410,31 +423,9 @@ export async function fetchPrivacyCoins(
       throw new Error("Page must be greater than 0");
     }
 
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${COINGECKO_API_BASE}/coins/markets?vs_currency=usd&category=privacy-coins&order=market_cap_desc&per_page=${limit}&page=${page}&sparkline=true&price_change_percentage=1h,24h,7d`
     );
-
-    // Handle rate limiting (429 status)
-    if (response.status === 429) {
-      const retryAfter = response.headers.get("Retry-After");
-      const retrySeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;
-      throw new RateLimitError(
-        "API rate limit exceeded. Please wait before making another request.",
-        retrySeconds
-      );
-    }
-
-    // Handle other HTTP errors
-    if (!response.ok) {
-      if (response.status >= 500) {
-        throw new Error(
-          `CoinGecko API server error (${response.status}). Please try again later.`
-        );
-      }
-      throw new Error(
-        `CoinGecko API error: ${response.status} ${response.statusText}`
-      );
-    }
 
     const data: Cryptocurrency[] = await response.json();
     
@@ -474,6 +465,75 @@ export async function fetchPrivacyCoins(
 }
 
 /**
+ * Market chart data response structure
+ */
+export interface MarketChartData {
+  prices: [number, number][]; // [timestamp, price]
+  market_caps: [number, number][];
+  total_volumes: [number, number][];
+}
+
+/**
+ * Fetches market chart data for a specific coin by timeframe
+ * 
+ * @param coinId - CoinGecko ID of the coin (e.g., "monero")
+ * @param timeframe - Timeframe: '1h', '24h', or '7d'
+ * @returns Promise resolving to market chart data
+ * @throws Error if the API request fails
+ */
+export async function fetchMarketChart(
+  coinId: string,
+  timeframe: '1h' | '24h' | '7d'
+): Promise<MarketChartData> {
+  if (!coinId) {
+    throw new Error("Coin ID is required to fetch market chart");
+  }
+
+  try {
+    // Map timeframes to CoinGecko API days parameter
+    const daysMap: Record<'1h' | '24h' | '7d', string> = {
+      '1h': '1',   // 1 day with hourly granularity
+      '24h': '1',  // 1 day with 5-min granularity
+      '7d': '7',   // 7 days with hourly granularity
+    };
+
+    const days = daysMap[timeframe];
+    const response = await fetchWithRetry(
+      `${COINGECKO_API_BASE}/coins/${encodeURIComponent(coinId)}/market_chart?vs_currency=usd&days=${days}`,
+      {
+        headers: { 'Accept': 'application/json' }
+      }
+    );
+
+    const data: MarketChartData = await response.json();
+
+    if (!data || !data.prices || !Array.isArray(data.prices)) {
+      throw new Error("Invalid market chart response from CoinGecko API");
+    }
+
+    return data;
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new NetworkError(
+        "Network error: Unable to connect to CoinGecko API. Please check your internet connection."
+      );
+    }
+
+    // Re-throw custom errors
+    if (error instanceof RateLimitError || error instanceof NetworkError) {
+      throw error;
+    }
+
+    // Handle other errors
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch market chart: ${error.message}`);
+    }
+    throw new Error("Failed to fetch market chart: Unknown error");
+  }
+}
+
+/**
  * Fetches detailed information for a specific coin
  * 
  * @param coinId - CoinGecko ID of the coin (e.g., "monero")
@@ -486,33 +546,11 @@ export async function fetchCoinDetail(coinId: string): Promise<CoinDetail> {
   }
 
   try {
-    const response = await fetch(
+    const response = await fetchWithRetry(
       `${COINGECKO_API_BASE}/coins/${encodeURIComponent(
         coinId
       )}?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false`
     );
-
-    // Handle rate limiting (429 status)
-    if (response.status === 429) {
-      const retryAfter = response.headers.get("Retry-After");
-      const retrySeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;
-      throw new RateLimitError(
-        "API rate limit exceeded. Please wait before making another request.",
-        retrySeconds
-      );
-    }
-
-    // Handle other HTTP errors
-    if (!response.ok) {
-      if (response.status >= 500) {
-        throw new Error(
-          `CoinGecko API server error (${response.status}). Please try again later.`
-        );
-      }
-      throw new Error(
-        `CoinGecko API error: ${response.status} ${response.statusText}`
-      );
-    }
 
     const data: CoinDetail = await response.json();
 
@@ -541,4 +579,61 @@ export async function fetchCoinDetail(coinId: string): Promise<CoinDetail> {
     throw new Error("Failed to fetch coin details: Unknown error");
   }
 }
+
+/**
+ * Fetch 30-day price history for specific coins
+ * Used for 30D timeframe in stats charts
+ * 
+ * @param coinIds - Array of CoinGecko coin IDs to fetch history for
+ * @returns Promise resolving to a record mapping coinId to price history array
+ */
+export async function get30DayHistory(coinIds: string[]): Promise<Record<string, [number, number][]>> {
+  if (!coinIds || coinIds.length === 0) {
+    return {};
+  }
+
+  try {
+    // Fetch 30-day data for each coin in parallel
+    const promises = coinIds.map(async (coinId) => {
+      try {
+        const url = `${COINGECKO_API_BASE}/coins/${encodeURIComponent(coinId)}/market_chart?vs_currency=usd&days=30&interval=daily`;
+        const response = await fetchWithRetry(url);
+        const data: MarketChartData = await response.json();
+        return { coinId, prices: data.prices || [] }; // [[timestamp, price], ...]
+      } catch (error) {
+        console.error(`Failed to fetch 30D data for ${coinId}:`, error);
+        return { coinId, prices: [] };
+      }
+    });
+
+    const results = await Promise.all(promises);
+
+    // Convert to Record<coinId, prices>
+    const historyMap: Record<string, [number, number][]> = {};
+    results.forEach(({ coinId, prices }) => {
+      historyMap[coinId] = prices;
+    });
+
+    return historyMap;
+  } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw new NetworkError(
+        "Network error: Unable to fetch 30-day history. Please check your internet connection."
+      );
+    }
+
+    // Re-throw custom errors
+    if (error instanceof RateLimitError || error instanceof NetworkError) {
+      throw error;
+    }
+
+    // Handle other errors
+    if (error instanceof Error) {
+      throw new Error(`Failed to fetch 30-day history: ${error.message}`);
+    }
+    throw new Error("Failed to fetch 30-day history: Unknown error");
+  }
+}
+
 

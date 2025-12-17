@@ -7,6 +7,13 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import CoinDetail from "./pages/CoinDetail";
 import Compare from "./pages/Compare";
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Security from "./pages/Security";
+import PrivacyMarket from "./pages/PrivacyMarket";
+import Anon20 from "./pages/Anon20";
+import Highlights from "./pages/Highlights";
+import Dominance from "./pages/Dominance";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +32,13 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/coin/:coinId" element={<CoinDetail />} />
           <Route path="/compare" element={<Compare />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/security" element={<Security />} />
+          <Route path="/privacy-market" element={<PrivacyMarket />} />
+          <Route path="/anon20" element={<Anon20 />} />
+          <Route path="/highlights" element={<Highlights />} />
+          <Route path="/dominance" element={<Dominance />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

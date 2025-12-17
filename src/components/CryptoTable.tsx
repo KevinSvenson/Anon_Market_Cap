@@ -7,10 +7,16 @@ import {
   RateLimitError,
   NetworkError 
 } from "@/services/coingecko";
-import { Loader2, AlertCircle, WifiOff, Clock, ArrowUpDown, ArrowUp, ArrowDown, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Shield } from "lucide-react";
+import { ArrowUpDown, ArrowUp, ArrowDown, Search, X, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Shield, Info, Share2 } from "lucide-react";
+import { ShareModal } from "@/components/ShareModal";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import InlinePriceChart from "./InlinePriceChart";
-import { getPrivacyMetadata, getTechnologyColor, getTechnologyDisplayName, getAllTechnologies, getPrivacyLevelColor, getAllPrivacyLevels, detectNewCoins, type PrivacyTechnology, type PrivacyLevel } from "@/data/privacyMetadata";
+import { getPrivacyMetadata, getTechnologyColor, getTechnologyDisplayName, getAllTechnologies, getAllPrivacyLevels, detectNewCoins, type PrivacyTechnology, type PrivacyLevel } from "@/data/privacyMetadata";
+import TableSkeleton from "./table/TableSkeleton";
+import ErrorState from "./table/ErrorState";
+import EmptyState from "./table/EmptyState";
+import ActiveFilters from "./filters/ActiveFilters";
 import {
   Tooltip,
   TooltipContent,
@@ -47,17 +53,67 @@ const formatPrice = (num: number): string => {
 type SortColumn = "market_cap_rank" | "name" | "current_price" | "market_cap" | "price_change_percentage_1h_in_currency" | "price_change_percentage_24h" | "price_change_percentage_7d_in_currency" | "total_volume";
 type SortDirection = "asc" | "desc" | null;
 
-const CryptoTable = () => {
-  const navigate = useNavigate();
-  const [sortColumn, setSortColumn] = useState<SortColumn>("market_cap_rank");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [technologyFilter, setTechnologyFilter] = useState<PrivacyTechnology | "all">("all");
-  const [privacyLevelFilter, setPrivacyLevelFilter] = useState<PrivacyLevel | "all">("all");
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(25);
+interface CryptoTableProps {
+  technologyFilter?: PrivacyTechnology | "all";
+  privacyLevelFilter?: PrivacyLevel | "all";
+  displayTechFilter?: string | null;
+  searchQuery?: string;
+  itemsPerPage?: number;
+  rankingMode?: 'global' | 'privacy';
+  coinsWithPrivacyRank?: Array<Cryptocurrency & { privacy_rank?: number }>;
+  onTechnologyFilterChange?: (filter: PrivacyTechnology | "all") => void;
+  onPrivacyLevelFilterChange?: (filter: PrivacyLevel | "all") => void;
+  onDisplayTechFilterChange?: (filter: string | null) => void;
+  onSearchQueryChange?: (query: string) => void;
+}
 
-  const { data, isLoading, error, isError } = useQuery({
+const CryptoTable = ({
+  technologyFilter: externalTechnologyFilter,
+  privacyLevelFilter: externalPrivacyLevelFilter,
+  displayTechFilter: externalDisplayTechFilter,
+  searchQuery: externalSearchQuery,
+  itemsPerPage: externalItemsPerPage,
+  rankingMode = 'global',
+  coinsWithPrivacyRank,
+  onTechnologyFilterChange,
+  onPrivacyLevelFilterChange,
+  onDisplayTechFilterChange,
+  onSearchQueryChange,
+}: CryptoTableProps = {}) => {
+  const navigate = useNavigate();
+  const [sortColumn, setSortColumn] = useState<SortColumn>("market_cap");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("desc"); // desc = highest market cap first
+  const [internalSearchQuery, setInternalSearchQuery] = useState<string>("");
+  const [internalTechnologyFilter, setInternalTechnologyFilter] = useState<PrivacyTechnology | "all">("all");
+  const [internalPrivacyLevelFilter, setInternalPrivacyLevelFilter] = useState<PrivacyLevel | "all">("all");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [internalItemsPerPage, setInternalItemsPerPage] = useState<number>(25);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedCoin, setSelectedCoin] = useState<Cryptocurrency | null>(null);
+
+  // Use external filters if provided, otherwise use internal state
+  const technologyFilter = externalTechnologyFilter !== undefined ? externalTechnologyFilter : internalTechnologyFilter;
+  const privacyLevelFilter = externalPrivacyLevelFilter !== undefined ? externalPrivacyLevelFilter : internalPrivacyLevelFilter;
+  const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearchQuery;
+  const itemsPerPage = externalItemsPerPage !== undefined ? externalItemsPerPage : internalItemsPerPage;
+
+  const setTechnologyFilter = (filter: PrivacyTechnology | "all") => {
+    if (onTechnologyFilterChange) {
+      onTechnologyFilterChange(filter);
+    } else {
+      setInternalTechnologyFilter(filter);
+    }
+  };
+
+  const setPrivacyLevelFilter = (filter: PrivacyLevel | "all") => {
+    if (onPrivacyLevelFilterChange) {
+      onPrivacyLevelFilterChange(filter);
+    } else {
+      setInternalPrivacyLevelFilter(filter);
+    }
+  };
+
+  const { data, isLoading, error, isError, refetch } = useQuery({
     queryKey: ["privacyCoins"],
     queryFn: () => fetchPrivacyCoins(100, 1),
     refetchInterval: (query) => {
@@ -86,12 +142,64 @@ const CryptoTable = () => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
+  // Active filter tracking
+  const activeFilters = useMemo(() => {
+    const filters: Array<{id: string, label: string, type: string}> = [];
+    if (searchQuery.trim()) {
+      filters.push({id: 'search', label: `Search: "${searchQuery}"`, type: 'search'});
+    }
+    if (technologyFilter !== 'all' && !externalDisplayTechFilter) {
+      filters.push({id: 'tech', label: technologyFilter, type: 'technology'});
+    }
+    if (privacyLevelFilter !== 'all') {
+      filters.push({id: 'privacy', label: `${privacyLevelFilter} Privacy`, type: 'privacy'});
+    }
+    if (externalDisplayTechFilter) {
+      filters.push({id: 'displayTech', label: externalDisplayTechFilter, type: 'displayTech'});
+    }
+    return filters;
+  }, [searchQuery, technologyFilter, privacyLevelFilter, externalDisplayTechFilter]);
+
+  const clearAllFilters = () => {
+    // Clear search (external or internal)
+    if (onSearchQueryChange) {
+      onSearchQueryChange("");
+    } else if (externalSearchQuery === undefined) {
+      setInternalSearchQuery("");
+    }
+    setTechnologyFilter("all");
+    setPrivacyLevelFilter("all");
+    if (onDisplayTechFilterChange) {
+      onDisplayTechFilterChange(null);
+    }
+  };
+
+  const handleRemoveFilter = (filterId: string) => {
+    if (filterId === 'search') {
+      // Clear search (external or internal)
+      if (onSearchQueryChange) {
+        onSearchQueryChange("");
+      } else if (externalSearchQuery === undefined) {
+        setInternalSearchQuery("");
+      }
+    } else if (filterId === 'tech') {
+      setTechnologyFilter("all");
+    } else if (filterId === 'privacy') {
+      setPrivacyLevelFilter("all");
+    } else if (filterId === 'displayTech' && onDisplayTechFilterChange) {
+      onDisplayTechFilterChange(null);
+    }
+  };
+
+  // Use coins with privacy rank if provided, otherwise use data from query
+  const coinsData = coinsWithPrivacyRank || data || [];
+
   // Filter and sort data based on search query, technology filter, and sort settings
   const filteredAndSortedData = useMemo(() => {
-    if (!data) return [];
+    if (!coinsData || coinsData.length === 0) return [];
 
     // First, filter by search query
-    let filtered = data;
+    let filtered = coinsData;
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase().trim();
       filtered = data.filter((crypto) => {
@@ -114,6 +222,14 @@ const CryptoTable = () => {
       filtered = filtered.filter((crypto) => {
         const metadata = getPrivacyMetadata(crypto.id);
         return metadata.privacyLevel === privacyLevelFilter;
+      });
+    }
+
+    // Then, filter by displayTech (if specified)
+    if (externalDisplayTechFilter) {
+      filtered = filtered.filter((crypto) => {
+        const metadata = getPrivacyMetadata(crypto.id);
+        return metadata.displayTech === externalDisplayTechFilter;
       });
     }
 
@@ -179,7 +295,7 @@ const CryptoTable = () => {
     });
 
     return sorted;
-  }, [data, sortColumn, sortDirection, searchQuery, technologyFilter, privacyLevelFilter]);
+  }, [coinsData, sortColumn, sortDirection, searchQuery, technologyFilter, privacyLevelFilter]);
 
   // Pagination calculations
   const totalItems = filteredAndSortedData.length;
@@ -245,19 +361,32 @@ const CryptoTable = () => {
     }
   };
 
+  const handleShare = (coin: Cryptocurrency, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedCoin(coin);
+    setShareModalOpen(true);
+  };
+
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
-      // Cycle through: desc -> asc -> null (default) -> desc
+      // Cycle through: desc -> asc -> default (market_cap_rank asc)
       if (sortDirection === "desc") {
         setSortDirection("asc");
       } else if (sortDirection === "asc") {
-        setSortDirection(null);
         setSortColumn("market_cap_rank"); // Reset to default
-        setSortDirection("desc");
+        setSortDirection("asc"); // Default is asc for market_cap_rank (rank 1,2,3...)
       }
     } else {
       setSortColumn(column);
       setSortDirection("desc");
+    }
+  };
+
+  const handleSortKeyDown = (e: React.KeyboardEvent, column: SortColumn) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handleSort(column);
     }
   };
 
@@ -271,188 +400,54 @@ const CryptoTable = () => {
     if (sortDirection === "desc") {
       return <ArrowDown className="h-3 w-3 ml-1" />;
     }
+    // This shouldn't happen, but handle null case
     return <ArrowUpDown className="h-3 w-3 ml-1 opacity-50" />;
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          <p className="text-muted-foreground">Loading cryptocurrency data...</p>
-        </div>
-      </div>
-    );
+    return <TableSkeleton rows={10} />;
   }
 
   if (isError && error) {
-    // Handle rate limit errors
-    if (error instanceof RateLimitError) {
-      return (
-        <div className="flex items-center justify-center py-12">
-          <div className="flex flex-col items-center gap-4 text-center max-w-md">
-            <Clock className="h-8 w-8 text-muted-foreground" />
-            <div>
-              <p className="text-lg font-semibold text-foreground">
-                Rate Limit Exceeded
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {error.message}
-                {error.retryAfter && (
-                  <span className="block mt-1">
-                    Retry after {error.retryAfter} seconds
-                  </span>
-                )}
-              </p>
-              <p className="text-xs text-muted-foreground mt-3">
-                The data will automatically refresh when the rate limit resets.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Handle network errors
-    if (error instanceof NetworkError) {
-      return (
-        <div className="flex items-center justify-center py-12">
-          <div className="flex flex-col items-center gap-4 text-center max-w-md">
-            <WifiOff className="h-8 w-8 text-destructive" />
-            <div>
-              <p className="text-lg font-semibold text-foreground">
-                Network Error
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {error.message}
-              </p>
-              <p className="text-xs text-muted-foreground mt-3">
-                Please check your internet connection and try again.
-              </p>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Handle other errors
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="flex flex-col items-center gap-4 text-center max-w-md">
-          <AlertCircle className="h-8 w-8 text-destructive" />
-          <div>
-            <p className="text-lg font-semibold text-foreground">
-              Failed to load cryptocurrency data
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              {error instanceof Error ? error.message : "An unknown error occurred"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-3">
-              The data will automatically retry. Please refresh the page if the problem persists.
-            </p>
-          </div>
-        </div>
-      </div>
+      <ErrorState
+        error={error}
+        action={() => refetch()}
+        actionLabel="Try Again"
+      />
     );
   }
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">No cryptocurrency data available</p>
-      </div>
+      <EmptyState
+        message="No cryptocurrency data available"
+      />
+    );
+  }
+
+  const hasFilters = searchQuery.trim() || technologyFilter !== "all" || privacyLevelFilter !== "all";
+  
+  if (filteredAndSortedData.length === 0 && hasFilters) {
+    return (
+      <EmptyState
+        message="No coins match your filters"
+        action={clearAllFilters}
+        actionLabel="Clear Filters"
+      />
     );
   }
 
   return (
     <div className="space-y-4">
-      {/* Filters Row */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Technology Filter */}
-        <div className="flex-shrink-0 sm:w-64">
-          <select
-            value={technologyFilter}
-            onChange={(e) => setTechnologyFilter(e.target.value as PrivacyTechnology | "all")}
-            className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
-          >
-            <option value="all">All Technologies</option>
-            {getAllTechnologies().map((tech) => (
-              <option key={tech} value={tech}>
-                {tech}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Privacy Level Filter */}
-        <div className="flex-shrink-0 sm:w-48">
-          <select
-            value={privacyLevelFilter}
-            onChange={(e) => setPrivacyLevelFilter(e.target.value as PrivacyLevel | "all")}
-            className="w-full px-3 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
-          >
-            <option value="all">All Privacy Levels</option>
-            {getAllPrivacyLevels().map((level) => (
-              <option key={level} value={level}>
-                {level}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Search Input */}
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="text"
-            placeholder="Search by name or symbol..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-10 py-2 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground placeholder:text-muted-foreground"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Clear search"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Filtered Count and Items Per Page */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-        {(searchQuery || technologyFilter !== "all" || privacyLevelFilter !== "all") ? (
-          <p className="text-sm text-muted-foreground">
-            Showing {filteredAndSortedData.length} of {data?.length || 0} coins
-            {technologyFilter !== "all" && ` • ${technologyFilter}`}
-            {privacyLevelFilter !== "all" && ` • ${privacyLevelFilter} Privacy`}
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {totalItems} {totalItems === 1 ? "coin" : "coins"}
-          </p>
-        )}
-        
-        {/* Items Per Page Selector */}
-        <div className="flex items-center gap-2">
-          <label htmlFor="itemsPerPage" className="text-sm text-muted-foreground">
-            Items per page:
-          </label>
-          <select
-            id="itemsPerPage"
-            value={itemsPerPage}
-            onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
-            className="px-2 py-1 text-sm bg-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
-          >
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </div>
-      </div>
+      {/* Active Filters */}
+      {activeFilters.length > 0 && (
+        <ActiveFilters
+          filters={activeFilters}
+          onRemove={handleRemoveFilter}
+          onClearAll={clearAllFilters}
+        />
+      )}
 
       {/* Table */}
       <div className="rounded-lg border border-border bg-card shadow-sm">
@@ -464,15 +459,35 @@ const CryptoTable = () => {
               <th 
                 className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("market_cap_rank")}
+                onKeyDown={(e) => handleSortKeyDown(e, "market_cap_rank")}
+                tabIndex={0}
+                role="button"
+                aria-label="Sort by rank"
               >
-                <div className="flex items-center">
-                  #
-                  {getSortIcon("market_cap_rank")}
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1">
+                      #
+                      <Info className="h-3 w-3 opacity-50" />
+                      {getSortIcon("market_cap_rank")}
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="text-xs">
+                      {rankingMode === 'global' 
+                        ? 'Rank among all cryptocurrencies by market cap' 
+                        : 'Rank among privacy coins by market cap'}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               </th>
               <th 
                 className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("name")}
+                onKeyDown={(e) => handleSortKeyDown(e, "name")}
+                tabIndex={0}
+                role="button"
+                aria-label="Sort by name"
               >
                 <div className="flex items-center">
                   Name
@@ -492,12 +507,17 @@ const CryptoTable = () => {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>How anonymous your transactions are</p>
+                    <p className="text-xs mt-1 opacity-80">Dots indicate level: 1 (Minimal), 2 (Medium), 3 (High)</p>
                   </TooltipContent>
                 </Tooltip>
               </th>
               <th 
                 className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("current_price")}
+                onKeyDown={(e) => handleSortKeyDown(e, "current_price")}
+                tabIndex={0}
+                role="button"
+                aria-label="Sort by price"
               >
                 <div className="flex items-center justify-end">
                   Price
@@ -507,6 +527,10 @@ const CryptoTable = () => {
               <th 
                 className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden lg:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("market_cap")}
+                onKeyDown={(e) => handleSortKeyDown(e, "market_cap")}
+                tabIndex={0}
+                role="button"
+                aria-label="Sort by market cap"
               >
                 <div className="flex items-center justify-end">
                   Market Cap
@@ -516,6 +540,10 @@ const CryptoTable = () => {
               <th 
                 className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden lg:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("total_volume")}
+                onKeyDown={(e) => handleSortKeyDown(e, "total_volume")}
+                tabIndex={0}
+                role="button"
+                aria-label="Sort by volume"
               >
                 <div className="flex items-center justify-end">
                   24h Volume
@@ -525,6 +553,10 @@ const CryptoTable = () => {
               <th 
                 className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden xl:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("price_change_percentage_1h_in_currency")}
+                onKeyDown={(e) => handleSortKeyDown(e, "price_change_percentage_1h_in_currency")}
+                tabIndex={0}
+                role="button"
+                aria-label="Sort by 1h change"
               >
                 <div className="flex items-center justify-end">
                   1h
@@ -534,6 +566,10 @@ const CryptoTable = () => {
               <th 
                 className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("price_change_percentage_24h")}
+                onKeyDown={(e) => handleSortKeyDown(e, "price_change_percentage_24h")}
+                tabIndex={0}
+                role="button"
+                aria-label="Sort by 24h change"
               >
                 <div className="flex items-center justify-end">
                   24h
@@ -543,6 +579,10 @@ const CryptoTable = () => {
               <th 
                 className="px-3 sm:px-4 py-3 text-right text-xs sm:text-sm font-semibold text-muted-foreground hidden md:table-cell cursor-pointer hover:bg-muted/50 transition-colors select-none"
                 onClick={() => handleSort("price_change_percentage_7d_in_currency")}
+                onKeyDown={(e) => handleSortKeyDown(e, "price_change_percentage_7d_in_currency")}
+                tabIndex={0}
+                role="button"
+                aria-label="Sort by 7d change"
               >
                 <div className="flex items-center justify-end">
                   7d
@@ -552,12 +592,15 @@ const CryptoTable = () => {
               <th className="px-3 sm:px-4 py-3 text-center text-xs sm:text-sm font-semibold text-muted-foreground hidden sm:table-cell">
                 Last 7 Days
               </th>
+              <th className="px-3 sm:px-4 py-3 text-center text-xs sm:text-sm font-semibold text-muted-foreground">
+                Share
+              </th>
             </tr>
           </thead>
           <tbody>
             {paginatedData.length === 0 ? (
               <tr>
-                <td colSpan={10} className="px-3 sm:px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={11} className="px-3 sm:px-4 py-8 text-center text-muted-foreground">
                   {searchQuery ? "No coins found matching your search." : "No cryptocurrency data available"}
                 </td>
               </tr>
@@ -570,12 +613,42 @@ const CryptoTable = () => {
                 tabIndex={0}
                 role="button"
                 aria-label={`View details for ${crypto.name}`}
-                className="border-b border-border transition-colors hover:bg-muted/50 last:border-b-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                className={cn(
+                  "border-b border-border",
+                  "transition-all duration-200",
+                  "cursor-pointer",
+                  "hover:bg-muted/50",
+                  "hover:border-l-4 hover:border-l-primary",
+                  "group",
+                  "last:border-b-0",
+                  "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background"
+                )}
               >
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-muted-foreground">
-                  {index + 1 + (currentPage - 1) * itemsPerPage}
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm text-muted-foreground">
+                  {(() => {
+                    const displayRank = rankingMode === 'global' 
+                      ? crypto.market_cap_rank 
+                      : (crypto as any).privacy_rank;
+                    
+                    const secondaryRank = rankingMode === 'global' 
+                      ? (crypto as any).privacy_rank 
+                      : crypto.market_cap_rank;
+                    
+                    return (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-muted-foreground">
+                          {displayRank ? `#${displayRank}` : '—'}
+                        </span>
+                        {secondaryRank && (
+                          <span className="text-xs text-muted-foreground/60">
+                            {rankingMode === 'global' ? `(#${secondaryRank} pvcy)` : `(#${secondaryRank} global)`}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4">
+                <td className="px-3 sm:px-4 py-2 sm:py-3">
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <img
                       src={crypto.image}
@@ -598,54 +671,70 @@ const CryptoTable = () => {
                     </div>
                   </div>
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-center hidden md:table-cell">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-center hidden md:table-cell">
                   {(() => {
                     const metadata = getPrivacyMetadata(crypto.id);
+                    const displayLabel = metadata.displayTech || getTechnologyDisplayName(metadata.technology);
+                    const tooltipText = metadata.technology === "Unknown" 
+                      ? "Privacy technology classification pending research" 
+                      : metadata.displayTech 
+                        ? `${metadata.displayTech} (${metadata.technology} category)`
+                        : metadata.technologyDescription;
                     return (
                       <span 
                         className={cn(
                           "inline-block px-2 py-1 rounded-md text-xs font-medium border whitespace-nowrap",
                           getTechnologyColor(metadata.technology)
                         )}
-                        title={metadata.technology === "Unknown" ? "Privacy technology classification pending research" : metadata.technologyDescription}
+                        title={tooltipText}
                       >
-                        {getTechnologyDisplayName(metadata.technology)}
+                        {displayLabel}
                       </span>
                     );
                   })()}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-center hidden lg:table-cell">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-center hidden lg:table-cell">
                   {(() => {
                     const metadata = getPrivacyMetadata(crypto.id);
+                    const totalSegments = 3;
+                    const filledSegments = metadata.privacyLevel === "High" ? 3 
+                      : metadata.privacyLevel === "Medium" ? 2 : 1;
+                    const activeColor = metadata.privacyLevel === "High" ? "bg-green-500" 
+                      : metadata.privacyLevel === "Medium" ? "bg-yellow-500" : "bg-gray-500";
+                    
                     return (
-                      <span 
-                        className={cn(
-                          "inline-block px-2 py-1 rounded-md text-xs font-medium border whitespace-nowrap",
-                          getPrivacyLevelColor(metadata.privacyLevel)
-                        )}
-                        title="Privacy Strength: How anonymous your transactions are"
+                      <div 
+                        className="flex items-center justify-center gap-0.5" 
+                        title={`Privacy Strength: ${metadata.privacyLevel}`}
                       >
-                        {metadata.privacyLevel}
-                      </span>
+                        {Array.from({ length: totalSegments }).map((_, i) => (
+                          <div 
+                            key={i} 
+                            className={`w-4 h-2 rounded-sm ${
+                              i < filledSegments ? activeColor : "bg-black"
+                            }`}
+                          />
+                        ))}
+                      </div>
                     );
                   })()}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-foreground whitespace-nowrap">
                   {crypto.current_price != null 
                     ? formatPrice(crypto.current_price)
                     : "N/A"}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right text-xs sm:text-sm text-foreground hidden lg:table-cell whitespace-nowrap">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-foreground hidden lg:table-cell whitespace-nowrap">
                   {crypto.market_cap != null 
                     ? formatMarketCapFull(crypto.market_cap)
                     : "N/A"}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right text-xs sm:text-sm text-muted-foreground hidden lg:table-cell whitespace-nowrap">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm text-muted-foreground hidden lg:table-cell whitespace-nowrap">
                   {crypto.total_volume != null 
                     ? formatCurrency(crypto.total_volume)
                     : "N/A"}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right hidden xl:table-cell">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-right hidden xl:table-cell">
                   {crypto.price_change_percentage_1h_in_currency != null ? (
                     <span
                       className={cn(
@@ -662,7 +751,7 @@ const CryptoTable = () => {
                     <span className="text-xs sm:text-sm text-muted-foreground">N/A</span>
                   )}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-right">
                   {crypto.price_change_percentage_24h != null ? (
                     <span
                       className={cn(
@@ -679,7 +768,7 @@ const CryptoTable = () => {
                     <span className="text-xs sm:text-sm text-muted-foreground">N/A</span>
                   )}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-right hidden md:table-cell">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-right hidden md:table-cell">
                   {crypto.price_change_percentage_7d_in_currency != null ? (
                     <span
                       className={cn(
@@ -696,11 +785,22 @@ const CryptoTable = () => {
                     <span className="text-xs sm:text-sm text-muted-foreground">N/A</span>
                   )}
                 </td>
-                <td className="px-3 sm:px-4 py-3 sm:py-4 text-center hidden sm:table-cell">
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-center hidden sm:table-cell">
                   <InlinePriceChart
                     sparklineData={crypto.sparkline_in_7d?.price}
                     priceChange24h={crypto.price_change_percentage_24h}
                   />
+                </td>
+                <td className="px-3 sm:px-4 py-2 sm:py-3 text-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => handleShare(crypto, e)}
+                    className="h-8 w-8 p-0"
+                    aria-label={`Share ${crypto.name}`}
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
                 </td>
               </tr>
               ))
@@ -791,6 +891,18 @@ const CryptoTable = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Share Modal */}
+      {selectedCoin && (
+        <ShareModal
+          coin={selectedCoin}
+          open={shareModalOpen}
+          onClose={() => {
+            setShareModalOpen(false);
+            setSelectedCoin(null);
+          }}
+        />
       )}
     </div>
   );
